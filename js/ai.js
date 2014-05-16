@@ -1,4 +1,38 @@
 /*jslint browser: true, white: true, vars: true */
+/*globals GameManager, proxy_makeMove */
+
+(function (global) {
+    "use strict";
+    var emptyFunc = function () { return undefined; };
+    function fakeInputManager() {
+        this.on = emptyFunc;
+    }
+    
+    function fakeActuator() {
+        this.actuate = emptyFunc;
+    }
+    
+    function makeMove(model, move) {
+        var gameManager = new GameManager(model.grid.size, fakeInputManager, fakeActuator,
+            function fakeStorageManager() {
+                this.getGameState = function () {
+                    return model;
+                };
+                this.getBestScore = emptyFunc;
+                this.setGameState = emptyFunc;
+            });
+        gameManager.actuate = emptyFunc;
+        gameManager.move(move);
+        return {
+            score: gameManager.score,
+            model: JSON.parse(JSON.stringify(gameManager.serialize())),
+            wasMoved: JSON.stringify(gameManager.serialize().grid) !== JSON.stringify(model.grid),
+            move: move
+        };
+    }
+
+    global.proxy_makeMove = makeMove;
+}(window));
 
 (function (global) {
     "use strict";
@@ -26,6 +60,12 @@
                 return this.keyCodeVal;
             }
         });     
+        
+        Object.defineProperty(oEvent, 'target', {
+            get : function() {
+                return {tagName: ""};
+            }
+        });     
 
         if (oEvent.initKeyboardEvent) {
             oEvent.initKeyboardEvent("keydown", true, true, document.defaultView, false, false, false, false, k, k);
@@ -50,25 +90,43 @@
             DOWN: 40
         };
 
-        var makeAIMove = function () {
+        /*var makeAIMove = function () {
             var moves = [MOVE.LEFT, MOVE.UP, MOVE.RIGHT, MOVE.DOWN];
             var randomIndex = Math.floor(Math.random()*4);
             var randomMove = moves[randomIndex];
             return randomMove;
-        };
+        };*/
 
-        function aiLoop() {
+        var oneLevelAI = function (model) {
+            var possibleMoves = [0, 1, 2, 3].map(function (internalMove) {
+                var copyOfModel = JSON.parse(JSON.stringify(model));
+                return proxy_makeMove(copyOfModel, internalMove);
+            });
+
+            var bestMove = possibleMoves.sort(function (a, b) {
+                var d = a.score - b.score;
+                if (d === 0 ) {
+                    d = (a.wasMoved ? 1 : 0) - (b.wasMoved ? 1 : 0);
+                }
+                return -d;
+            })[0];
+
+            var moves = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
+            return moves[bestMove.move];
+        };
+        
+        function aiLoop(aiAlgorithm) {
             setTimeout(function () {
                 var model = JSON.parse(localStorage.getItem("gameState"));
                 if(model !== null) {
-                    var aiMove = makeAIMove(model);
+                    var aiMove = aiAlgorithm(model);
                     keydown(aiMove);
-                    aiLoop();
+                    aiLoop(aiAlgorithm);
                 }
             }, 100);
         }
 
-        aiLoop();
+        aiLoop(oneLevelAI);
     }
 
     global.runAI = runAI;
