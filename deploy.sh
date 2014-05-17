@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "javascript:$(yuicompressor js/ai.js)runAI();"
+echo "javascript:$(yuicompressor js/ai/player.js)runAI();"
