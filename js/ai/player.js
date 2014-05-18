@@ -18,6 +18,7 @@
                 this.getGameState = function () {
                     return model;
                 };
+                this.clearGameState = emptyFunc;
                 this.getBestScore = emptyFunc;
                 this.setGameState = emptyFunc;
             });
@@ -97,7 +98,7 @@
             return randomMove;
         };*/
 
-        var oneLevelAI = function (model) {
+        /*var oneLevelAI = function (model) {
             var possibleMoves = [0, 1, 2, 3].map(function (internalMove) {
                 var copyOfModel = JSON.parse(JSON.stringify(model));
                 return proxy_makeMove(copyOfModel, internalMove);
@@ -113,6 +114,55 @@
 
             var moves = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
             return moves[bestMove.move];
+        };*/
+
+        var treeAI = function (model, maxLevel) {
+            var leaves = [];
+
+            var expandTree = function (node, level) {
+                if (level == maxLevel) {
+                    leaves.push(node);
+                    return;
+                }
+
+                var possibleMoves = [0, 1, 2, 3].map(function (internalMove) {
+                    var copyOfModel = JSON.parse(JSON.stringify(node.value));
+                    var newNode = {
+                        value: proxy_makeMove(copyOfModel.model, internalMove), 
+                        children: [],
+                        move: internalMove,
+                        parent: node
+                    };
+
+                    if(newNode.value.wasMoved) {
+                        node.children.push(newNode);
+                    }
+                });
+
+                node.children.forEach(function (childNode) {
+                    expandTree(childNode, level + 1);
+                });
+
+                if(node.children.length == 0) {
+                    leaves.push(node);
+                }
+            };
+
+            var rootNode = {value: {model: model}, children: []};
+            expandTree(rootNode, 0);
+
+            var bestNode = leaves.sort(function (a, b) {
+                return b.value.score - a.value.score;
+            })[0];
+
+            var bestMove;
+            while (bestNode.parent !== undefined) {
+                bestMove = bestNode.move;
+                bestNode = bestNode.parent;
+            }
+
+            var moves = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
+            return moves[bestMove];
         };
         
         function aiLoop(aiAlgorithm) {
@@ -126,7 +176,7 @@
             }, 100);
         }
 
-        aiLoop(oneLevelAI);
+        aiLoop(function (model) { return treeAI(model, 3);});
     }
 
     global.runAI = runAI;
