@@ -23,6 +23,7 @@
                 this.setGameState = emptyFunc;
             });
         gameManager.actuate = emptyFunc;
+        gameManager.keepPlaying = true;
         gameManager.move(move);
         return {
             score: gameManager.score,
@@ -41,33 +42,30 @@
     var keydown = function (k) {
         var oEvent = document.createEvent('KeyboardEvent');
 
+        var defineConstantGetter = function (name, value) {
+            Object.defineProperty(oEvent, name, {
+                get : function() {
+                    return value;
+                }
+            });     
+        };
+
         Object.defineProperty(oEvent, 'keyCode', {
             get : function() {
                 return this.keyCodeVal;
             }
         });     
-        Object.defineProperty(oEvent, 'metaKey', {
-            get : function() {
-                return false;
-            }
-        });     
-        Object.defineProperty(oEvent, 'shiftKey', {
-            get : function() {
-                return false;
-            }
-        });     
+
         Object.defineProperty(oEvent, 'which', {
             get : function() {
                 return this.keyCodeVal;
             }
         });     
-        
-        Object.defineProperty(oEvent, 'target', {
-            get : function() {
-                return {tagName: ""};
-            }
-        });     
 
+        defineConstantGetter('metaKey', false);
+        defineConstantGetter('shiftKey', false);
+        defineConstantGetter('target', { tagName: "" });
+        
         if (oEvent.initKeyboardEvent) {
             oEvent.initKeyboardEvent("keydown", true, true, document.defaultView, false, false, false, false, k, k);
         } else {
@@ -75,10 +73,6 @@
         }
 
         oEvent.keyCodeVal = k;
-
-        if (oEvent.keyCode !== k) {
-            throw "keyCode mismatch " + oEvent.keyCode + "(" + oEvent.which + ")";
-        }
 
         document.dispatchEvent(oEvent);
     };
