@@ -49,19 +49,9 @@
                 }
             });     
         };
-
-        Object.defineProperty(oEvent, 'keyCode', {
-            get : function() {
-                return this.keyCodeVal;
-            }
-        });     
-
-        Object.defineProperty(oEvent, 'which', {
-            get : function() {
-                return this.keyCodeVal;
-            }
-        });     
-
+        
+        defineConstantGetter('keyCode', k);
+        defineConstantGetter('which', k);
         defineConstantGetter('metaKey', false);
         defineConstantGetter('shiftKey', false);
         defineConstantGetter('target', { tagName: "" });
@@ -71,8 +61,6 @@
         } else {
             oEvent.initKeyEvent("keydown", true, true, document.defaultView, false, false, false, false, k, 0);
         }
-
-        oEvent.keyCodeVal = k;
 
         document.dispatchEvent(oEvent);
     };
