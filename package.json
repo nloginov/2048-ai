@@ -6,7 +6,7 @@
     "uglifyjs": "^2.4.10"
   },
   "scripts": {
-    "start": "./build.sh"
+    "start": "node build.js"
   },
   "repository": {
     "type": "git",
