@@ -5,10 +5,11 @@ This is JavaScript AI player for the original 2048 game (http://gabrielecirulli.
 
 How to run
 ----------
-1. Run `deploy.sh` and copy the ouput.
-2. Go to http://gabrielecirulli.github.io/2048/
-3. Paste the output in the browser address bar (browser can strip `javascript:` prefix so you need to restore it).
-4. Press `Enter` and enjoy!
+1. Run `npm install`
+2. Run `npm start` and copy the ouput.
+3. Go to http://gabrielecirulli.github.io/2048/
+4. Paste the output in the browser address bar (browser can strip `javascript:` prefix so you need to restore it).
+5. Press `Enter` and enjoy!
 
 License
 ----
