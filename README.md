@@ -1,17 +1,23 @@
-Artificial intelligence player for 2048 game
-============================================
+# A.I. player for the Doctor Who "Thirteen" game.
 
-This is JavaScript AI player for the original 2048 game (http://gabrielecirulli.github.io/2048/) by @gabrielecirulli that runs from the address bar.
 
-How to run
-----------
-1. Run `npm install`
-2. Run `npm start` and copy the ouput.
-3. Go to http://gabrielecirulli.github.io/2048/
-4. Paste the output in the browser address bar (browser can strip `javascript:` prefix so you need to restore it).
-5. Press `Enter` and enjoy!
+This is JavaScript AI player for a variant of the game "2048".
 
-License
-----
+Play the game "Thirteen" here: https://doctorwho.tv/games/thirteen/
 
-MIT
+
+## How to use the A.I.
+
+1. In your browser's bookmark bar, right click
+2. Click "Add Page"
+3. Paste the following content into the `URL` field
+
+    ```js
+    javascript:(function(){document.body.appendChild(document.createElement('script')).src='https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/ai.js';}())
+    ```
+
+4. Click "Save"
+5. Visit https://doctorwho.tv/games/thirteen/
+6. Click the bookmark created in step 4
+7. Watch how for it gets
+
