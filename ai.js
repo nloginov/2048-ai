@@ -13,6 +13,23 @@ let VALUE_MAP = {
   8192: 13, 16384: 14, 32768: 15
 };
 
+let DOCTOR_NUMBER_MAP = {
+  1: '01 - William Hartnell',
+  2: '02 - Patrick Troughton',
+  3: '03 - Jon Pertwee',
+  4: '04 - Tom Baker',
+  5: '05 - Peter Davison',
+  6: '06 - Colin Baker',
+  7: '07 - Sylvester McCoy',
+  8: '08 - Paul McGann',
+  9: 'War - John Hurt',
+  10: '09 - Christopher Eccleston',
+  11: '10 - David Tennant',
+  12: '11 - Matt Smith',
+  13: '12 - Peter Capaldi',
+  14: '13 - Jodie Whittaker',
+};
+
 AI.Service = {
     enumerateAllMoves: function () {
         "use strict";
@@ -179,9 +196,11 @@ function boot() {
         if(model !== null) {
           console.group('Board State');
           console.debug(model);
+          let biggest = biggestTile(model);
+          console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
           console.time('calculating best move');
-          let aiMove = treeAI(model, biggestTile(model).num || 4);
+          let aiMove = treeAI(model, biggest || 4);
           console.timeEnd('calculating best move');
 
           console.debug('Best Move: ', MOVE_MAP[aiMove]);
