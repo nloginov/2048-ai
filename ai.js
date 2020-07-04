@@ -125,6 +125,7 @@ var treeAI = function (model, maxLevel) {
     return bestMove;
 };
 
+
 (function (global) {
     "use strict";
 
@@ -166,8 +167,20 @@ var treeAI = function (model, maxLevel) {
             }, 100);
         }
 
-        aiLoop(function (model) { return treeAI(model, 6);});
+        aiLoop(function (model) { return treeAI(model, 7);});
     }
 
     global.runAI = runAI;
+
+    function installUI() {
+      let run = document.createElement('button');
+
+      run.innerText = 'Run A.I.';
+      run.style="position: fixed; top: 1rem; left: 1rem;";
+      run.addEventListener('click', () => runAI());
+
+      document.body.appendChild(run);
+    }
+
+    installUI();
 }(window));
