@@ -1,0 +1,29 @@
+{
+  "name": "doctor-who-thirteen-game-ai",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:NullVoxPopuli/doctor-who-thirteen-game-ai.git",
+  "author": "NullVoxPopuli",
+  "license": "MIT",
+  "scripts": {
+    "lint:js": "yarn eslint . --cache"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": "yarn eslint --fix --quiet --cache"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.4.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "prettier": "^2.0.5"
+  }
+}
