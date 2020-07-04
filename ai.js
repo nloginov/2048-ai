@@ -4,6 +4,8 @@
 var AI = {};
 AI.MOVE = { LEFT: 37, UP: 38,  RIGHT: 39, DOWN: 40 };
 
+let ALL_MOVES = [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
+
 let MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
 let VALUE_MAP = {
   2: 1, 4: 2, 8: 3,
@@ -103,53 +105,52 @@ var oneLevelAI = function (model) {
     return bestMove.move;
 };
 
-var treeAI = function (model, maxLevel) {
-    "use strict";
-    var leaves = [];
+function treeAI(model, maxLevel) {
+  let leaves = [];
 
-    var expandTree = function (node, level) {
-        if (level === maxLevel) {
-            leaves.push(node);
-            return;
-        }
-
-        AI.Service.enumerateAllMoves().map(function (move) {
-            var copyOfModel = JSON.parse(JSON.stringify(node.value));
-            var newNode = {
-                value: AI.Service.imitateMove(copyOfModel.model, move),
-                children: [],
-                move: move,
-                parent: node
-            };
-
-            if(newNode.value.wasMoved) {
-                node.children.push(newNode);
-            }
-        });
-
-        node.children.forEach(function (childNode) {
-            expandTree(childNode, level + 1);
-        });
-
-        if(node.children.length === 0) {
-            leaves.push(node);
-        }
-    };
-
-    var rootNode = {value: {model: model}, children: []};
-    expandTree(rootNode, 0);
-
-    var bestNode = leaves.sort(function (a, b) {
-        return b.value.score - a.value.score;
-    })[0];
-
-    var bestMove;
-    while (bestNode.parent !== undefined) {
-        bestMove = bestNode.move;
-        bestNode = bestNode.parent;
+  function expandTree(node, level) {
+    if (level === maxLevel) {
+      leaves.push(node);
+      return;
     }
 
-    return bestMove;
+    for (let move of ALL_MOVES) {
+      let copyOfModel = JSON.parse(JSON.stringify(node.value));
+      let newNode = {
+          value: AI.Service.imitateMove(copyOfModel.model, move),
+          children: [],
+          move: move,
+          parent: node
+      };
+
+      if(newNode.value.wasMoved) {
+        node.children.push(newNode);
+      }
+    }
+
+    for (let childNode of node.children) {
+      expandTree(childNode, level + 1);
+    }
+
+    if(node.children.length === 0) {
+      leaves.push(node);
+    }
+  };
+
+  let rootNode = {value: {model: model}, children: []};
+  expandTree(rootNode, 0);
+
+  let bestNode = leaves.sort(function (a, b) {
+    return b.value.score - a.value.score;
+  })[0];
+
+  let bestMove;
+  while (bestNode.parent !== undefined) {
+    bestMove = bestNode.move;
+    bestNode = bestNode.parent;
+  }
+
+  return bestMove;
 };
 
 function biggestTile(game) {
@@ -206,7 +207,7 @@ function boot() {
           console.debug('Best Move: ', MOVE_MAP[aiMove]);
           console.groupEnd();
 
-          if (aiMove) {
+          if (!model.over) {
 
             // calculating the move could take a while,
             // be kind to the browser and issue a dom-changing event
