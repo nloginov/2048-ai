@@ -150,7 +150,7 @@ function treeAI(model, maxLevel) {
 
   expandTree(rootNode, 0);
 
-  let sortedLeaves = leaves.sort((a, b) => a.weightedScore - b.weightedScore);
+  let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
   let bestNode = sortedLeaves[0];
 
   console.debug(sortedLeaves);
