@@ -46,7 +46,7 @@ function fakeGameFrom(model) {
   }
 
   let gameManager = new GameManager(
-    game.grid.size,
+    model.grid.size,
     fakeInputManager,
     fakeActuator,
     function fakeStorageManager() {
