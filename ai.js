@@ -1,5 +1,6 @@
-/*jslint browser: true, white: true, vars: true */
-/*globals GameManager, proxy_makeMove */
+// NOTE: most of this code is from:
+// https://github.com/nloginov/2048-ai
+
 var AI = {};
 AI.MOVE = { LEFT: 37, UP: 38,  RIGHT: 39, DOWN: 40 };
 AI.Service = {
@@ -88,7 +89,7 @@ var treeAI = function (model, maxLevel) {
         AI.Service.enumerateAllMoves().map(function (move) {
             var copyOfModel = JSON.parse(JSON.stringify(node.value));
             var newNode = {
-                value: AI.Service.imitateMove(copyOfModel.model, move), 
+                value: AI.Service.imitateMove(copyOfModel.model, move),
                 children: [],
                 move: move,
                 parent: node
@@ -135,15 +136,15 @@ var treeAI = function (model, maxLevel) {
                 get : function() {
                     return value;
                 }
-            });     
+            });
         };
-        
+
         defineConstantGetter('keyCode', k);
         defineConstantGetter('which', k);
         defineConstantGetter('metaKey', false);
         defineConstantGetter('shiftKey', false);
         defineConstantGetter('target', { tagName: "" });
-        
+
         if (oEvent.initKeyboardEvent) {
             oEvent.initKeyboardEvent("keydown", true, true, document.defaultView, false, false, false, false, k, k);
         } else {
