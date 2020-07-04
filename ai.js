@@ -155,18 +155,23 @@ function boot() {
     };
 
     function runAI() {
-        function aiLoop(aiAlgorithm) {
-            setTimeout(function () {
-                var model = JSON.parse(localStorage.getItem("gameState"));
-                if(model !== null) {
-                    var aiMove = aiAlgorithm(model);
-                    keydown(aiMove);
-                    aiLoop(aiAlgorithm);
-                }
-            }, 100);
-        }
+      let activeAlgorithm = model => treeAI(model, 7);
 
-        aiLoop(function (model) { return treeAI(model, 7);});
+      function runAlgorithm() {
+        let model = JSON.parse(localStorage.getItem("gameState"));
+
+        if(model !== null) {
+          let aiMove = activeAlgorithm(model);
+
+          if (aiMove) {
+            keydown(aiMove);
+
+            requestIdleCallback(runAlgorithm);
+          }
+        }
+      }
+
+      requestIdleCallback(runAlgorithm);
     }
 
     function installUI() {
