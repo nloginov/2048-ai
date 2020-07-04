@@ -217,7 +217,7 @@ function boot() {
 
               // allow time for the animation
               setTimeout(() => {
-                requestIdleCallback(runAlgorithm);
+                requestAnimationFrame(runAlgorithm)
               }, 100);
             });
           }
