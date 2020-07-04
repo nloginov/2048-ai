@@ -166,7 +166,7 @@ var treeAI = function (model, maxLevel) {
             }, 100);
         }
 
-        aiLoop(function (model) { return treeAI(model, 3);});
+        aiLoop(function (model) { return treeAI(model, 6);});
     }
 
     global.runAI = runAI;
