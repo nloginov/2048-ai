@@ -155,7 +155,7 @@ var treeAI = function (model, maxLevel) {
 function biggestTile(game) {
   let tiles = game.grid.cells.map(row => row.map(cell => cell ? cell.value : 1)).flat();
 
-  let value = Math.max(tiles);
+  let value = Math.max(...tiles);
 
   return { value, num: VALUE_MAP[value] };
 }
