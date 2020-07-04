@@ -196,7 +196,7 @@ function boot() {
         if(model !== null) {
           console.group('Board State');
           console.debug(model);
-          let biggest = biggestTile(model);
+          let biggest = biggestTile(model).num;
           console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
           console.time('calculating best move');
