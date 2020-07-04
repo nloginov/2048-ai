@@ -3,6 +3,16 @@
 
 var AI = {};
 AI.MOVE = { LEFT: 37, UP: 38,  RIGHT: 39, DOWN: 40 };
+
+let MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
+let VALUE_MAP = {
+  2: 1, 4: 2, 8: 3,
+  16: 4, 32: 5, 64: 6,
+  128: 7, 256: 8, 512: 9,
+  1024: 10, 2048: 11, 4096: 12,
+  8192: 13, 16384: 14, 32768: 15
+};
+
 AI.Service = {
     enumerateAllMoves: function () {
         "use strict";
@@ -125,6 +135,14 @@ var treeAI = function (model, maxLevel) {
     return bestMove;
 };
 
+function biggestTile(grid) {
+  let tiles = grid.cells.map(row => row.map(cell => cell.value)).flat();
+
+  let value = Math.max(tiles);
+
+  return { value, num: VALUE_MAP[value] };
+}
+
 
 function boot() {
 
@@ -155,20 +173,21 @@ function boot() {
     };
 
     function runAI() {
-      let activeAlgorithm = model => treeAI(model, 8);
-
       function runAlgorithm() {
         let model = JSON.parse(localStorage.getItem("gameState"));
 
-        console.debug('Board State:', model);
-        console.debug('Move Codes:', AI.MOVE);
         if(model !== null) {
+          console.group('Board State');
+          console.debug(model);
+
           console.time('calculating best move');
-          let aiMove = activeAlgorithm(model);
+          let aiMove = treeAI(model, biggestTile(model));
           console.timeEnd('calculating best move');
 
+          console.debug('Best Move: ', MOVE_MAP[aiMove]);
+          console.groupEnd();
+
           if (aiMove) {
-            console.debug('Best Move: ', aiMove);
 
             requestIdleCallback(() => {
               keydown(aiMove);
