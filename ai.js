@@ -53,6 +53,18 @@ const DOCTOR_NUMBER_MAP = {
 
 const voidFn = () => undefined;
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
+const isEqual = (a, b) => {
+  // a and b have the same dimensions
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      if (a[i][j] !== b[i][j]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
 
 function fakeGameFrom(model) {
   function fakeInputManager() {
@@ -97,9 +109,7 @@ AI.Service = {
         move,
         score: gameManager.score,
         model: clone(serialized),
-        // this might be a slow operation
-        wasMoved:
-          JSON.stringify(serialized.grid) !== JSON.stringify(model.grid),
+        wasMoved: !isEqual(serialized.grid, model.grid),
       };
     };
   })(),
