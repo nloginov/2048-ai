@@ -155,7 +155,7 @@ function boot() {
     };
 
     function runAI() {
-      let activeAlgorithm = model => treeAI(model, 7);
+      let activeAlgorithm = model => treeAI(model, 8);
 
       function runAlgorithm() {
         let model = JSON.parse(localStorage.getItem("gameState"));
