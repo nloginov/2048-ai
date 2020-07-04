@@ -169,9 +169,11 @@ function boot() {
 
           if (aiMove) {
             console.debug('Best Move: ', aiMove);
-            keydown(aiMove);
 
-            requestIdleCallback(runAlgorithm);
+            requestIdleCallback(() => {
+              keydown(aiMove);
+              requestIdleCallback(runAlgorithm);
+            });
           }
         }
       }
