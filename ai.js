@@ -126,16 +126,15 @@ var treeAI = function (model, maxLevel) {
 };
 
 
-(function (global) {
-    "use strict";
+function boot() {
 
-    var keydown = function (k) {
-        var oEvent = document.createEvent('KeyboardEvent');
+    function keydown(k) {
+        let oEvent = document.createEvent('KeyboardEvent');
 
-        var defineConstantGetter = function (name, value) {
+         function defineConstantGetter(name, value) {
             Object.defineProperty(oEvent, name, {
-                get : function() {
-                    return value;
+                get() {
+                  return value;
                 }
             });
         };
@@ -170,8 +169,6 @@ var treeAI = function (model, maxLevel) {
         aiLoop(function (model) { return treeAI(model, 7);});
     }
 
-    global.runAI = runAI;
-
     function installUI() {
       let run = document.createElement('button');
 
@@ -183,4 +180,6 @@ var treeAI = function (model, maxLevel) {
     }
 
     installUI();
-}(window));
+}
+
+boot();
