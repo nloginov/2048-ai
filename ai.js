@@ -1,4 +1,4 @@
-// NOTE: most of this code is from:
+// NOTE: original code from:
 // https://github.com/nloginov/2048-ai
 
 var AI = {};
@@ -32,77 +32,64 @@ let DOCTOR_NUMBER_MAP = {
   14: '13 - Jodie Whittaker',
 };
 
-AI.Service = {
-    enumerateAllMoves: function () {
-        "use strict";
-        return [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
-    },
-    imitateMove: (function() {
-        "use strict";
-        var emptyFunc = function () { return undefined; };
-        function fakeInputManager() {
-            this.on = emptyFunc;
-        }
 
-        function fakeActuator() {
-            this.actuate = emptyFunc;
-        }
+const voidFn = () => undefined;
+const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
-        var moveMapping = [];
-        moveMapping[AI.MOVE.UP] = 0;
-        moveMapping[AI.MOVE.RIGHT] = 1;
-        moveMapping[AI.MOVE.DOWN] = 2;
-        moveMapping[AI.MOVE.LEFT] = 3;
+function fakeGameFrom(model) {
+  function fakeInputManager() {
+    this.on = voidFn;
+  }
 
-        return function makeMove(model, move) {
-            var internalMove = moveMapping[move];
-            var gameManager = new GameManager(model.grid.size, fakeInputManager, fakeActuator,
-                function fakeStorageManager() {
-                    this.getGameState = function () {
-                        return model;
-                    };
-                    this.clearGameState = emptyFunc;
-                    this.getBestScore = emptyFunc;
-                    this.setGameState = emptyFunc;
-                });
-            gameManager.actuate = emptyFunc;
-            gameManager.keepPlaying = true;
-            gameManager.move(internalMove);
-            return {
-                score: gameManager.score,
-                    model: JSON.parse(JSON.stringify(gameManager.serialize())),
-                    wasMoved: JSON.stringify(gameManager.serialize().grid) !== JSON.stringify(model.grid),
-                    move: move
-            };
-        };
-    }())
-};
+  function fakeActuator() {
+    this.actuate = voidFn;
+  }
 
-
-var randomMoveAI = function () {
-    "use strict";
-    var moves = AI.Service.enumerateAllMoves();
-    var randomIndex = Math.floor(Math.random()*moves.length);
-    var randomMove = moves[randomIndex];
-    return randomMove;
-};
-
-var oneLevelAI = function (model) {
-    "use strict";
-    var possibleMoves = AI.Service.enumerateAllMoves().map(function (move) {
-        var copyOfModel = JSON.parse(JSON.stringify(model));
-        return AI.Service.imitateMove(copyOfModel, move);
+  let gameManager = new GameManager(
+    game.grid.size,
+    fakeInputManager,
+    fakeActuator,
+    function fakeStorageManager() {
+      this.getGameState = function () {
+        return model;
+      };
+      this.clearGameState = voidFn;
+      this.getBestScore = voidFn;
+      this.setGameState = voidFn;
     });
 
-    var bestMove = possibleMoves.sort(function (a, b) {
-        var d = a.score - b.score;
-        if (d === 0 ) {
-            d = (a.wasMoved ? 1 : 0) - (b.wasMoved ? 1 : 0);
-        }
-        return -d;
-    })[0];
 
-    return bestMove.move;
+  return gameManager;
+}
+
+AI.Service = {
+  imitateMove: (function() {
+
+    var moveMapping = [];
+    moveMapping[AI.MOVE.UP] = 0;
+    moveMapping[AI.MOVE.RIGHT] = 1;
+    moveMapping[AI.MOVE.DOWN] = 2;
+    moveMapping[AI.MOVE.LEFT] = 3;
+
+    return function makeMove(model, move) {
+      let internalMove = moveMapping[move];
+      let gameManager = fakeGameFrom(model);
+
+      gameManager.actuate = voidFn;
+      gameManager.keepPlaying = true;
+      gameManager.move(internalMove);
+
+      let serialized = gameManager.serialize();
+
+      return {
+        move,
+        score: gameManager.score,
+        model: clone(serialized),
+        // this might be a slow operation
+        wasMoved: JSON.stringify(serialized.grid) !== JSON.stringify(model.grid),
+      };
+    };
+  }())
 };
 
 function treeAI(model, maxLevel) {
@@ -115,7 +102,7 @@ function treeAI(model, maxLevel) {
     }
 
     for (let move of ALL_MOVES) {
-      let copyOfModel = JSON.parse(JSON.stringify(node.value));
+      let copyOfModel = clone(node.value);
       let newNode = {
           value: AI.Service.imitateMove(copyOfModel.model, move),
           children: [],
@@ -137,14 +124,16 @@ function treeAI(model, maxLevel) {
     }
   };
 
-  let rootNode = {value: {model: model}, children: []};
+  let rootNode = {
+    value: { model },
+    children: []
+  };
+
   expandTree(rootNode, 0);
 
-  let bestNode = leaves.sort(function (a, b) {
-    return b.value.score - a.value.score;
-  })[0];
-
+  let bestNode = leaves.sort((a, b) => b.value.score - a.value.score)[0];
   let bestMove;
+
   while (bestNode.parent !== undefined) {
     bestMove = bestNode.move;
     bestNode = bestNode.parent;
