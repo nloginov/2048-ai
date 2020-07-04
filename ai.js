@@ -118,7 +118,7 @@ AI.Service = {
 function treeAI(model, maxLevel) {
   let leaves = [];
 
-  function expandTree(node, level) {
+  function expandTree(node, level, root) {
     if (level === maxLevel) {
       return leaves.push(node);
     }
@@ -135,6 +135,7 @@ function treeAI(model, maxLevel) {
         children: [],
         move: move,
         parent: node,
+        root,
       };
 
       if (newNode.value.wasMoved) {
@@ -143,7 +144,7 @@ function treeAI(model, maxLevel) {
     }
 
     for (let childNode of node.children) {
-      expandTree(childNode, level + 1);
+      expandTree(childNode, level + 1, root && root.move ? root : node);
     }
 
     if (node.children.length === 0) {
@@ -161,18 +162,7 @@ function treeAI(model, maxLevel) {
   let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
   let bestNode = sortedLeaves[0];
 
-  console.debug(
-    sortedLeaves.map((l) => ({ ws: l.weightedScore, s: l.value.score }))
-  );
-
-  let bestMove;
-
-  while (bestNode.parent !== undefined) {
-    bestMove = bestNode.move;
-    bestNode = bestNode.parent;
-  }
-
-  return bestMove;
+  return bestNode.root && bestNode.root.move;
 }
 
 function biggestTile(game) {
