@@ -153,7 +153,9 @@ function treeAI(model, maxLevel) {
   let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
   let bestNode = sortedLeaves[0];
 
-  console.debug(sortedLeaves);
+  console.debug(
+    sortedLeaves.map((l) => ({ ws: l.weightedScore, s: l.value.score }))
+  );
 
   let bestMove;
 
