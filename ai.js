@@ -160,10 +160,15 @@ function boot() {
       function runAlgorithm() {
         let model = JSON.parse(localStorage.getItem("gameState"));
 
+        console.debug('Board State:', model);
+        console.debug('Move Codes:', AI.MOVE);
         if(model !== null) {
+          console.time('calculating best move');
           let aiMove = activeAlgorithm(model);
+          console.timeEnd('calculating best move');
 
           if (aiMove) {
+            console.debug('Best Move: ', aiMove);
             keydown(aiMove);
 
             requestIdleCallback(runAlgorithm);
