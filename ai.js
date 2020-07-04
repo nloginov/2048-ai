@@ -1,8 +1,9 @@
 // NOTE: original code from:
 // https://github.com/nloginov/2048-ai
+/* global GameManager */
 
 var AI = {};
-AI.MOVE = { LEFT: 37, UP: 38,  RIGHT: 39, DOWN: 40 };
+AI.MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 
 const ALL_MOVES = [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
 
@@ -16,11 +17,21 @@ const MOVE_KEY_MAP = {
 };
 
 const VALUE_MAP = {
-  2: 1, 4: 2, 8: 3,
-  16: 4, 32: 5, 64: 6,
-  128: 7, 256: 8, 512: 9,
-  1024: 10, 2048: 11, 4096: 12,
-  8192: 13, 16384: 14, 32768: 15
+  2: 1,
+  4: 2,
+  8: 3,
+  16: 4,
+  32: 5,
+  64: 6,
+  128: 7,
+  256: 8,
+  512: 9,
+  1024: 10,
+  2048: 11,
+  4096: 12,
+  8192: 13,
+  16384: 14,
+  32768: 15,
 };
 
 const DOCTOR_NUMBER_MAP = {
@@ -39,7 +50,6 @@ const DOCTOR_NUMBER_MAP = {
   13: '12 - Peter Capaldi',
   14: '13 - Jodie Whittaker',
 };
-
 
 const voidFn = () => undefined;
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
@@ -61,18 +71,18 @@ function fakeGameFrom(model) {
       this.getGameState = function () {
         return model;
       };
+
       this.clearGameState = voidFn;
       this.getBestScore = voidFn;
       this.setGameState = voidFn;
-    });
-
+    }
+  );
 
   return gameManager;
 }
 
 AI.Service = {
-  imitateMove: (function() {
-
+  imitateMove: (function () {
     return function makeMove(model, move) {
       let gameManager = fakeGameFrom(model);
       let internalMove = MOVE_KEY_MAP[move];
@@ -88,10 +98,11 @@ AI.Service = {
         score: gameManager.score,
         model: clone(serialized),
         // this might be a slow operation
-        wasMoved: JSON.stringify(serialized.grid) !== JSON.stringify(model.grid),
+        wasMoved:
+          JSON.stringify(serialized.grid) !== JSON.stringify(model.grid),
       };
     };
-  }())
+  })(),
 };
 
 function treeAI(model, maxLevel) {
@@ -100,12 +111,13 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     if (level === maxLevel) {
       leaves.push(node);
+
       return;
     }
 
     for (let move of ALL_MOVES) {
       let copyOfModel = clone(node.value);
-      let moveData =  AI.Service.imitateMove(copyOfModel.model, move);
+      let moveData = AI.Service.imitateMove(copyOfModel.model, move);
 
       let newNode = {
         // penalize scores with higher depth
@@ -117,7 +129,7 @@ function treeAI(model, maxLevel) {
         parent: node,
       };
 
-      if(newNode.value.wasMoved) {
+      if (newNode.value.wasMoved) {
         node.children.push(newNode);
       }
     }
@@ -126,19 +138,23 @@ function treeAI(model, maxLevel) {
       expandTree(childNode, level + 1);
     }
 
-    if(node.children.length === 0) {
+    if (node.children.length === 0) {
       leaves.push(node);
     }
-  };
+  }
 
   let rootNode = {
     value: { model },
-    children: []
+    children: [],
   };
 
   expandTree(rootNode, 0);
 
-  let bestNode = leaves.sort((a, b) => b.weightedScore - a.weightedScore)[0];
+  let sortedLeaves = leaves.sort((a, b) => a.weightedScore - b.weightedScore);
+  let bestNode = sortedLeaves[0];
+
+  console.debug(sortedLeaves);
+
   let bestMove;
 
   while (bestNode.parent !== undefined) {
@@ -147,93 +163,118 @@ function treeAI(model, maxLevel) {
   }
 
   return bestMove;
-};
+}
 
 function biggestTile(game) {
-  let tiles = game.grid.cells.map(row => row.map(cell => cell ? cell.value : 1)).flat();
+  let tiles = game.grid.cells
+    .map((row) => row.map((cell) => (cell ? cell.value : 1)))
+    .flat();
 
   let value = Math.max(...tiles);
 
   return { value, num: VALUE_MAP[value] };
 }
 
-
 function boot() {
+  function keydown(k) {
+    let oEvent = document.createEvent('KeyboardEvent');
 
-    function keydown(k) {
-        let oEvent = document.createEvent('KeyboardEvent');
+    function defineConstantGetter(name, value) {
+      Object.defineProperty(oEvent, name, {
+        get() {
+          return value;
+        },
+      });
+    }
 
-         function defineConstantGetter(name, value) {
-            Object.defineProperty(oEvent, name, {
-                get() {
-                  return value;
-                }
-            });
-        };
+    defineConstantGetter('keyCode', k);
+    defineConstantGetter('which', k);
+    defineConstantGetter('metaKey', false);
+    defineConstantGetter('shiftKey', false);
+    defineConstantGetter('target', { tagName: '' });
 
-        defineConstantGetter('keyCode', k);
-        defineConstantGetter('which', k);
-        defineConstantGetter('metaKey', false);
-        defineConstantGetter('shiftKey', false);
-        defineConstantGetter('target', { tagName: "" });
+    if (oEvent.initKeyboardEvent) {
+      oEvent.initKeyboardEvent(
+        'keydown',
+        true,
+        true,
+        document.defaultView,
+        false,
+        false,
+        false,
+        false,
+        k,
+        k
+      );
+    } else {
+      oEvent.initKeyEvent(
+        'keydown',
+        true,
+        true,
+        document.defaultView,
+        false,
+        false,
+        false,
+        false,
+        k,
+        0
+      );
+    }
 
-        if (oEvent.initKeyboardEvent) {
-            oEvent.initKeyboardEvent("keydown", true, true, document.defaultView, false, false, false, false, k, k);
-        } else {
-            oEvent.initKeyEvent("keydown", true, true, document.defaultView, false, false, false, false, k, 0);
-        }
+    document.dispatchEvent(oEvent);
+  }
 
-        document.dispatchEvent(oEvent);
-    };
+  function runAI() {
+    function runAlgorithm() {
+      let model = JSON.parse(localStorage.getItem('gameState'));
 
-    function runAI() {
-      function runAlgorithm() {
-        let model = JSON.parse(localStorage.getItem("gameState"));
+      if (model !== null) {
+        console.group('Board State');
+        console.debug(model);
+        let biggest = biggestTile(model).num;
 
-        if(model !== null) {
-          console.group('Board State');
-          console.debug(model);
-          let biggest = biggestTile(model).num;
-          console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+        console.debug(
+          `Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`
+        );
 
-          console.time('calculating best move');
-          let aiMove = treeAI(model, Math.max(biggest - 3, 1));
-          console.timeEnd('calculating best move');
+        console.time('calculating best move');
+        let aiMove = treeAI(model, Math.max(biggest - 3, 1));
 
-          console.debug('Best Move: ', MOVE_MAP[aiMove]);
-          console.groupEnd();
+        console.timeEnd('calculating best move');
 
-          if (!model.over) {
+        console.debug('Best Move: ', MOVE_MAP[aiMove]);
+        console.groupEnd();
 
-            // calculating the move could take a while,
-            // be kind to the browser and issue a dom-changing event
-            // next time we're idle
-            requestIdleCallback(() => {
-              keydown(aiMove);
+        if (!model.over) {
+          // calculating the move could take a while,
+          // be kind to the browser and issue a dom-changing event
+          // next time we're idle
+          requestIdleCallback(() => {
+            keydown(aiMove);
 
-              // allow time for the animation
-              setTimeout(() => {
-                requestAnimationFrame(runAlgorithm)
-              }, 100);
-            });
-          }
+            // allow time for the animation
+            setTimeout(() => {
+              requestAnimationFrame(runAlgorithm);
+            }, 100);
+          });
         }
       }
-
-      requestIdleCallback(runAlgorithm);
     }
 
-    function installUI() {
-      let run = document.createElement('button');
+    requestIdleCallback(runAlgorithm);
+  }
 
-      run.innerText = 'Run A.I.';
-      run.style="position: fixed; top: 1rem; left: 1rem;";
-      run.addEventListener('click', () => runAI());
+  function installUI() {
+    let run = document.createElement('button');
 
-      document.body.appendChild(run);
-    }
+    run.innerText = 'Run A.I.';
+    run.style = 'position: fixed; top: 1rem; left: 1rem;';
+    run.addEventListener('click', () => runAI());
 
-    installUI();
+    document.body.appendChild(run);
+  }
+
+  installUI();
 }
 
 boot();
