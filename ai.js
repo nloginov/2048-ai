@@ -109,7 +109,7 @@ AI.Service = {
         move,
         score: gameManager.score,
         model: clone(serialized),
-        wasMoved: !isEqual(serialized.grid, model.grid),
+        wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
       };
     };
   })(),
@@ -120,9 +120,7 @@ function treeAI(model, maxLevel) {
 
   function expandTree(node, level) {
     if (level === maxLevel) {
-      leaves.push(node);
-
-      return;
+      return leaves.push(node);
     }
 
     for (let move of ALL_MOVES) {
