@@ -4,10 +4,18 @@
 var AI = {};
 AI.MOVE = { LEFT: 37, UP: 38,  RIGHT: 39, DOWN: 40 };
 
-let ALL_MOVES = [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
+const ALL_MOVES = [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
 
-let MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
-let VALUE_MAP = {
+const MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
+
+const MOVE_KEY_MAP = {
+  [AI.MOVE.UP]: 0,
+  [AI.MOVE.RIGHT]: 1,
+  [AI.MOVE.DOWN]: 2,
+  [AI.MOVE.LEFT]: 3,
+};
+
+const VALUE_MAP = {
   2: 1, 4: 2, 8: 3,
   16: 4, 32: 5, 64: 6,
   128: 7, 256: 8, 512: 9,
@@ -15,7 +23,7 @@ let VALUE_MAP = {
   8192: 13, 16384: 14, 32768: 15
 };
 
-let DOCTOR_NUMBER_MAP = {
+const DOCTOR_NUMBER_MAP = {
   1: '01 - William Hartnell',
   2: '02 - Patrick Troughton',
   3: '03 - Jon Pertwee',
@@ -65,15 +73,9 @@ function fakeGameFrom(model) {
 AI.Service = {
   imitateMove: (function() {
 
-    var moveMapping = [];
-    moveMapping[AI.MOVE.UP] = 0;
-    moveMapping[AI.MOVE.RIGHT] = 1;
-    moveMapping[AI.MOVE.DOWN] = 2;
-    moveMapping[AI.MOVE.LEFT] = 3;
-
     return function makeMove(model, move) {
-      let internalMove = moveMapping[move];
       let gameManager = fakeGameFrom(model);
+      let internalMove = MOVE_KEY_MAP[move];
 
       gameManager.actuate = voidFn;
       gameManager.keepPlaying = true;
