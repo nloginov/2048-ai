@@ -208,9 +208,16 @@ function boot() {
 
           if (aiMove) {
 
+            // calculating the move could take a while,
+            // be kind to the browser and issue a dom-changing event
+            // next time we're idle
             requestIdleCallback(() => {
               keydown(aiMove);
-              requestIdleCallback(runAlgorithm);
+
+              // allow time for the animation
+              setTimeout(() => {
+                requestIdleCallback(runAlgorithm);
+              }, 100);
             });
           }
         }
