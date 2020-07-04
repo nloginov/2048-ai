@@ -205,33 +205,11 @@ function boot() {
     defineConstantGetter('shiftKey', false);
     defineConstantGetter('target', { tagName: '' });
 
-    if (oEvent.initKeyboardEvent) {
-      oEvent.initKeyboardEvent(
-        'keydown',
-        true,
-        true,
-        document.defaultView,
-        false,
-        false,
-        false,
-        false,
-        k,
-        k
-      );
-    } else {
-      oEvent.initKeyEvent(
-        'keydown',
-        true,
-        true,
-        document.defaultView,
-        false,
-        false,
-        false,
-        false,
-        k,
-        0
-      );
-    }
+    /* eslint-disable */
+    oEvent.initKeyboardEvent('keydown',
+      true, true, document.defaultView, false, false, false, false, k, k
+    );
+    /* eslint-enable */
 
     document.dispatchEvent(oEvent);
   }
