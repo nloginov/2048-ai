@@ -181,7 +181,7 @@ function boot() {
           console.debug(model);
 
           console.time('calculating best move');
-          let aiMove = treeAI(model, biggestTile(model));
+          let aiMove = treeAI(model, biggestTile(model).num || 4);
           console.timeEnd('calculating best move');
 
           console.debug('Best Move: ', MOVE_MAP[aiMove]);
