@@ -13,7 +13,7 @@ Play the game "Thirteen" here: https://doctorwho.tv/games/thirteen/
 3. Paste the following content into the `URL` field
 
     ```js
-    javascript:(function(){let src='https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/ai.js';async function fetchAndInsertScript(){let response=await fetch(src);let script=await response.text();let element=document.createElement('script');element.innerText=script;document.body.appendChild(element);}fetchAndInsertScript();})();
+    javascript:(function(){let src='https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/ai.js';async function fetchAndInsertScript(){let response=await fetch(src);let script=await response.text();let element=document.createElement('script');element.innerHTML=script;document.body.appendChild(element);}fetchAndInsertScript();})();
     ```
 
 4. Click "Save"

@@ -8,7 +8,7 @@ async function fetchAndInsertScript(){
 
   let element = document.createElement('script');
 
-  element.innerText = script;
+  element.innerHTML = script;
 
   document.body.appendChild(element);
 }
