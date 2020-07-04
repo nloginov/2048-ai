@@ -200,7 +200,7 @@ function boot() {
           console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
           console.time('calculating best move');
-          let aiMove = treeAI(model, biggest || 4);
+          let aiMove = treeAI(model, Math.max(biggest - 3, 1));
           console.timeEnd('calculating best move');
 
           console.debug('Best Move: ', MOVE_MAP[aiMove]);
