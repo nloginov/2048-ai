@@ -17,8 +17,7 @@ Play the game "Thirteen" here: https://doctorwho.tv/games/thirteen/
     ```
 
 4. Click "Save"
-5. Visit https://doctorwho.tv/games/thirteen/
-   or visit the game without the BBC wrapping content here: https://asset-manager.bbcchannels.com/m/2fzi3/
+5. Visit https://asset-manager.bbcchannels.com/m/2fzi3/
 6. Click the bookmark created in step 4
 7. Watch how for it gets
 
