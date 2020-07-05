@@ -116,7 +116,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 3 || level > maxLevel) {
+    if (level >= 5 || level > maxLevel) {
       return;
     }
 
@@ -280,14 +280,14 @@ class Model {
       if (!game.over || iterations < this.maxTrainingIterations) {
         game = clone;
 
-        return requestIdleCallback(() => update());
+        return setTimeout(() => update(), 1);
       }
 
       console.debug('Finished Training');
     };
 
     console.debug('Training');
-    requestIdleCallback(() => update());
+    setTimeout(() => update(), 1);
   }
 
   createNetwork() {
