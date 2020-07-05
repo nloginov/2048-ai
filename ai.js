@@ -82,7 +82,7 @@ class AIWorker {
     let blob = new Blob([script], { type: 'text/javascript' });
 
     this.worker = new Worker(URL.createObjectURL(blob));
-    this.worker.onMessage = this.onMessage;
+    this.worker.onmessage = this.onMessage;
   }
 
   send(data) {
