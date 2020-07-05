@@ -55,10 +55,8 @@ function treeAI(model, maxLevel) {
       root = root.parent;
     }
 
-    if (root.value.wasMoved) {
-      bestNode = root;
-      bestScore = childNode.weightedScore || 0;
-    }
+    bestNode = root;
+    bestScore = childNode.weightedScore || 0;
   }
 
   function expandTree(node, level) {
@@ -71,6 +69,10 @@ function treeAI(model, maxLevel) {
     for (let move of ALL_MOVES) {
       let copyOfModel = clone(node.value);
       let moveData = imitateMove(copyOfModel.model, move);
+
+      if (!moveData.wasMoved) {
+        continue;
+      }
 
       let newNode = {
         // penalize scores with higher depth
