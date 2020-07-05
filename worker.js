@@ -95,7 +95,7 @@ function treeAI(model, maxLevel) {
       let newNode = {
         // penalize scores with higher depth
         // also, add one to both level and maxLevel to avoid division by 0
-        weightedScore: moveData.score / ((level + 1) / (maxLevel + 1)),
+        weightedScore: moveData.score, // / ((level + 1) / (maxLevel + 1)),
         value: moveData,
         children: [],
         move: move,
@@ -214,9 +214,9 @@ function runRNN() {
     // hidden layer
     tf.layers.dense({
       // inner neurons
-      units: 16,
+      units: 8,
       // inputs, one for each of the grid spaces
-      inputShape: [8],
+      inputShape: [4, 4],
       activation: 'sigmoid',
       kernelInitializer: 'leCunNormal',
       biasInitializer: 'randomNormal',
@@ -235,7 +235,10 @@ function runRNN() {
     })
   );
 
-  model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
+  model.compile({
+    loss: 'meanSquaredError',
+    optimizer: tf.train.adam(0.01 /* learning rate */),
+  });
 
   // normalized to 0-1
   let output = 0;
