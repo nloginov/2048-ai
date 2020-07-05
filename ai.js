@@ -133,7 +133,7 @@ class UI {
   addRunButton() {
     let run = document.createElement('button');
 
-    run.innerText = 'Run A.I.';
+    run.innerText = 'Run A.I. (A*)';
     run.style = 'position: fixed; top: 1rem; left: 1rem;';
 
     run.addEventListener('click', () => this.runAI());
