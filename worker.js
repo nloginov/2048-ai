@@ -69,7 +69,7 @@ function imitateMove(model, move) {
 
   let serialized = gameManager.serialize();
 
-  Object.freeze(serialized);
+  // Object.freeze(serialized);
 
   return {
     move,
@@ -144,7 +144,7 @@ function treeAI(model, maxLevel) {
 }
 
 function run(game, maxLevel) {
-  Object.freeze(game);
+  // Object.freeze(game);
 
   console.group('Calculate Move');
   console.time('Time');
