@@ -1,7 +1,8 @@
 /* global importScripts, RL */
-importScripts(
-  'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
-);
+// importScripts(
+//   'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
+// );
+importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
