@@ -97,7 +97,7 @@ class AIWorker {
   requestNextMove(game) {
     let biggest = biggestTile(game).num;
 
-    console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+    console.info(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
     this.send({
       type: 'run',

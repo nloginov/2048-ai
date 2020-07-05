@@ -1,6 +1,3 @@
-// NOTE: original code from:
-// https://github.com/nloginov/2048-ai
-
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
 const MOVE_KEY_MAP = {
@@ -68,7 +65,7 @@ function imitateMove(model, move) {
 
   let serialized = gameManager.serialize();
 
-  // Object.freeze(serialized);
+  Object.freeze(serialized);
 
   return {
     move,
@@ -80,12 +77,41 @@ function imitateMove(model, move) {
   };
 }
 
+/**
+ * Initially, this started out as an A* algorithm, constrained by depth
+ *  - original version from https://github.com/nloginov/2048-ai
+ *
+ * Modifications:
+ * - use weighted score, penalizing a higher number of moves to achieve a score
+ * - instead of blindly searching until maxLevel,
+ *   maxLevel will only be reached in the event of ties in score
+ *
+ */
 function treeAI(model, maxLevel) {
   let leaves = [];
 
+  let bestNode;
+  let bestScore = 0;
+
+  function updateBest(childNode) {
+    if (childNode.weightedScore < bestScore) {
+      return;
+    }
+
+    let root = childNode;
+
+    while (root.parent !== undefined) {
+      bestMove = root.move;
+      root = root.parent;
+    }
+
+    bestNode = root;
+    bestScore = childNode.value.score;
+  }
+
   function expandTree(node, level) {
-    if (level === maxLevel) {
-      return leaves.push(node);
+    if (level >= maxLevel && node.weightedScore >= bestScore) {
+      return;
     }
 
     for (let move of ALL_MOVES) {
@@ -111,8 +137,8 @@ function treeAI(model, maxLevel) {
       expandTree(childNode, level + 1);
     }
 
-    if (node.children.length === 0 && node.value.wasMoved) {
-      leaves.push(node);
+    if (node.value.wasMoved) {
+      updateBest(node);
     }
   }
 
@@ -123,15 +149,7 @@ function treeAI(model, maxLevel) {
 
   expandTree(rootNode, 0);
 
-  let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
-  let bestNode = sortedLeaves[0];
-
-  let bestMove;
-
-  while (bestNode.parent !== undefined) {
-    bestMove = bestNode.move;
-    bestNode = bestNode.parent;
-  }
+  let bestMove = bestNode.move;
 
   console.debug(
     `Best Move: ${bestMove} aka ${MOVE_NAMES_MAP[bestMove]} out of ${leaves.length} options`
@@ -144,9 +162,9 @@ function treeAI(model, maxLevel) {
 }
 
 function run(game, maxLevel) {
-  // Object.freeze(game);
+  Object.freeze(game.grid);
 
-  console.group('Calculate Move');
+  console.groupCollapsed('Calculate Move');
   console.time('Time');
 
   let move = treeAI(game, maxLevel);
