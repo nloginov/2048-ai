@@ -101,9 +101,23 @@ class AIWorker {
   }
 
   requestNextMove(game, algorithm) {
+    if (!this.hasStarted) {
+      this.hasStarted = true;
+      this.startTime = new Date();
+      this.lastNewDoctorAt = new Date();
+    }
+
     let biggest = biggestTile(game).num;
 
     console.warn(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+
+    if (biggest !== this.lastBiggest) {
+      console.info(`New Doctor took: ${new Date() - this.lastNewDoctorAt}ms`);
+      console.info(`Total Time: ${new Date() - this.startTime}ms`);
+
+      this.lastBiggest = biggest;
+      this.lastNewDoctorAt = new Date();
+    }
 
     this.send({
       type: 'run',
@@ -151,10 +165,13 @@ class UI {
     buttons.appendChild(runRNN);
 
     document.body.appendChild(buttons);
+
+    this.buttons = [runAStar, runRNN];
   }
 
   runAI(algorithm) {
     this.algorithm = algorithm;
+    this.buttons.forEach((button) => (button.disabled = true));
 
     this.requestNextMove();
   }
