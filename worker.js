@@ -78,7 +78,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 7 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (level >= 15 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
@@ -192,7 +192,7 @@ function runAStar(game, maxLevel) {
   console.debug('-------------- Calculate Move -----------------');
   let initialTime = new Date();
 
-  let move = treeAI(game, Math.max(maxLevel, 3));
+  let move = treeAI(game, Math.max(maxLevel, 2));
 
   console.debug(`Time: ${new Date() - initialTime}ms`);
 
@@ -200,30 +200,40 @@ function runAStar(game, maxLevel) {
 }
 
 function runRNN() {
-  // followed: https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
+  // followed:
+  //   https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
+  //   https://heartbeat.fritz.ai/automating-chrome-dinosaur-game-part-1-290578f13907
 
   // below code is under worker environment
   // to import tfjs into worker from a cdn
   importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
 
-  let hiddenLayer = tf.layers.dense({
-    // inner neurons
-    units: 16,
-    // inputs, one for each of the grid spaces
-    inputShape: [16],
-    activation: 'sigmoid',
-    kernelInitializer: 'leCunNormal',
-    biasInitializer: 'randomNormal',
-    useBias: true,
-  });
-
-  // one output for each of Left, Right, Up, Down
-  let outputLayer = tf.layers.dense({ units: 4 });
-
   let model = tf.sequential();
 
-  model.add(hiddenLayer);
-  model.add(outputLayer);
+  model.add(
+    // hidden layer
+    tf.layers.dense({
+      // inner neurons
+      units: 16,
+      // inputs, one for each of the grid spaces
+      inputShape: [8],
+      activation: 'sigmoid',
+      kernelInitializer: 'leCunNormal',
+      biasInitializer: 'randomNormal',
+      useBias: true,
+    })
+  );
+
+  model.add(
+    // output layer
+    tf.layers.dense({
+      // inputs from hidden layer
+      inputShape: [8],
+      // one output for each of Left, Right, Up, Down
+      units: 4,
+      activation: 'sigmoid',
+    })
+  );
 
   model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
 
