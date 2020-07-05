@@ -223,20 +223,22 @@ function runAStar(game, maxLevel) {
 }
 
 class Model {
-  constructor(initialGame) {
+  constructor(initialGame, max) {
     this.initialGame = initialGame;
+    this.maxTrainingIterations = max || 1000;
 
     this.createNetwork();
   }
 
   train() {
     let game = this.initialGame;
+    let iterations = 0;
 
-    const step = async (board) => {
-      return await this.academy.step([
-        { teacherName: this.teacher, agentsInput: board },
-      ]);
-    };
+    // const step = async (board) => {
+    //   return await this.academy.step([
+    //     { teacherName: this.teacher, agentsInput: board },
+    //   ]);
+    // };
 
     const calculateReward = (move, clone) => {
       let moveData = imitateMove(clone, move);
@@ -253,16 +255,14 @@ class Model {
     };
 
     const update = async () => {
+      iterations++;
+
       let clone = clone(game);
       let inputs = clone.grid.cells
         .flat()
         .map((cell) => (cell ? cell.value : cell));
 
-      await step(inputs);
-
-      let action = this.academy.agents.get(this.agent).actionsBuffer[0];
-
-      console.log(action);
+      let action = this.agent.act(inputs);
 
       let move = ALL_MOVES(action);
 
@@ -270,19 +270,23 @@ class Model {
 
       game = clone;
 
-      this.academy.addRewardToAgent(this.agent, reward);
+      this.agent.learn(reward);
 
-      if (!game.over) {
-        requestIdleCallback(() => update());
+      if (!game.over || iterations < this.maxTrainingIterations) {
+        return requestIdleCallback(() => update());
       }
+
+      console.debug('Finished Training');
     };
 
+    console.debug('Training');
     requestIdleCallback(() => update());
   }
 
   createNetwork() {
     // followed:
     //   https://github.com/BeTomorrow/ReImproveJS
+    //   https://codepen.io/Samid737/pen/opmvaR
 
     importScripts(
       'https://cdn.jsdelivr.net/npm/reimprovejs@0/dist/reimprove.js'
