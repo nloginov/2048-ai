@@ -238,92 +238,88 @@ function runAStar(game, maxLevel) {
   self.postMessage({ type: 'move', move });
 }
 
-class Model {
-  constructor(initialGame, max) {
-    this.initialGame = initialGame;
-    this.maxTrainingIterations = max || 1000;
+let rnn;
+let maxTrainingIterations = 1000;
 
-    this.createNetwork();
-  }
+function createRnn() {
+  // followed:
+  //   https://codepen.io/Samid737/pen/opmvaR
+  //   https://github.com/karpathy/reinforcejs
 
-  train() {
-    let game = this.initialGame;
-    let iterations = 0;
+  let spec = {
+    update: 'qlearn', // qlearn | sarsa algorithm
+    gamma: 0.9, // discount factor, [0, 1)
+    epsilon: 0.001, // initial epsilon for epsilon-greedy policy, [0, 1)
+    alpha: 0.001, // value function learning rate
+    experience_add_every: 10, // number of time steps before we add another experience to replay memory
+    experience_size: 5000, // size of experience replay memory
+    learning_steps_per_iteration: 20,
+    tderror_clamp: 1.0, // for robustness
+    num_hidden_units: 100, // number of neurons in hidden layer
+  };
 
-    const calculateReward = (move, clone) => {
-      let moveData = imitateMove(clone, move);
+  let env = {
+    getNumStates: () => 4,
+    getMaxNumActions: () => 5,
+  };
 
-      if (moveData.wasMoved) {
-        return 0;
-      }
+  return new RL.DQNAgent(env, spec);
+}
 
-      if (moveData.score > game.score) {
-        return 1;
-      }
+async function train(initialGame) {
+  let game = initialGame;
+  let iterations = 0;
 
-      return -1;
-    };
+  const calculateReward = (move, clone) => {
+    let moveData = imitateMove(clone, move);
 
-    const update = async (resolve) => {
-      iterations++;
+    if (moveData.wasMoved) {
+      return 0;
+    }
 
-      let clone = clone(game);
-      let inputs = gameTo1DArray(clone);
-      let action = this.agent.act(inputs);
+    if (moveData.score > game.score) {
+      return 1;
+    }
 
-      let move = ALL_MOVES(action);
-      let reward = calculateReward(move, clone);
+    return -1;
+  };
 
-      this.agent.learn(reward);
+  const update = async (resolve) => {
+    iterations++;
 
-      if (!game.over || iterations < this.maxTrainingIterations) {
-        game = clone;
+    let clone = clone(game);
+    let inputs = gameTo1DArray(clone);
+    let action = rnn.act(inputs);
 
-        update(resolve);
-      }
+    let move = ALL_MOVES(action);
+    let reward = calculateReward(move, clone);
 
-      console.debug('Finished Training');
-      resolve();
-    };
+    rnn.learn(reward);
 
-    console.debug('Training');
+    if (!game.over || iterations < maxTrainingIterations) {
+      game = clone;
 
-    return new Promise((resolve) => {
       update(resolve);
-    });
-  }
+    }
 
-  createNetwork() {
-    // followed:
-    //   https://codepen.io/Samid737/pen/opmvaR
-    //   https://github.com/karpathy/reinforcejs
+    console.debug('Finished Training');
+    resolve();
+  };
 
-    let spec = {
-      update: 'qlearn', // qlearn | sarsa algorithm
-      gamma: 0.9, // discount factor, [0, 1)
-      epsilon: 0.001, // initial epsilon for epsilon-greedy policy, [0, 1)
-      alpha: 0.001, // value function learning rate
-      experience_add_every: 10, // number of time steps before we add another experience to replay memory
-      experience_size: 5000, // size of experience replay memory
-      learning_steps_per_iteration: 20,
-      tderror_clamp: 1.0, // for robustness
-      num_hidden_units: 100, // number of neurons in hidden layer
-    };
+  console.debug('Training');
 
-    let env = {
-      getNumStates: () => 4,
-      getMaxNumActions: () => 5,
-    };
-
-    this.agent = new RL.DQNAgent(env, spec);
-  }
+  return new Promise((resolve) => {
+    update(resolve);
+  });
 }
 
 async function runRNN(game) {
-  if (!self.model) {
-    self.model = new Model(game);
+  Object.freeze(game.grid);
 
-    await self.model.train();
+  if (!rnn) {
+    rnn = createRnn();
+
+    await train(game);
   }
 
   let inputs = gameTo1DArray(game);
