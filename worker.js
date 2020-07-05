@@ -104,7 +104,7 @@ function treeAI(model, maxLevel) {
         4
       );
 
-      for (let variance = 1; variance < maxVariance + 1; variance++) {
+      for (let variance = 0; variance <= maxVariance; variance++) {
         let copyOfModel = clone(node.value);
         let moveData = imitateMove(copyOfModel.model, move);
 
