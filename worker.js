@@ -28,55 +28,6 @@ const isEqual = (a, b) => {
   return true;
 };
 
-function fakeGameFrom(model) {
-  function fakeInputManager() {
-    this.on = voidFn;
-  }
-
-  function fakeActuator() {
-    this.actuate = voidFn;
-  }
-
-  let gameManager = new GameManager(
-    model.grid.size,
-    fakeInputManager,
-    fakeActuator,
-    function fakeStorageManager() {
-      this.getGameState = function () {
-        return model;
-      };
-
-      this.clearGameState = voidFn;
-      this.getBestScore = voidFn;
-      this.setGameState = voidFn;
-    }
-  );
-
-  return gameManager;
-}
-
-function imitateMove(model, move) {
-  let gameManager = fakeGameFrom(model);
-  let internalMove = MOVE_KEY_MAP[move];
-
-  gameManager.actuate = voidFn;
-  gameManager.keepPlaying = true;
-  gameManager.move(internalMove);
-
-  let serialized = gameManager.serialize();
-
-  Object.freeze(serialized);
-
-  return {
-    move,
-    score: gameManager.score,
-    model: serialized,
-    // NOTE: the score is not updated for the fake manager
-    // wasMoved: serialized.score !== model.score,
-    wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
-  };
-}
-
 /**
  * Initially, this started out as an A* algorithm, constrained by depth
  *  - original version from https://github.com/nloginov/2048-ai
@@ -160,8 +111,65 @@ function treeAI(model, maxLevel) {
   return bestMove;
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Game Helper Code
+/////////////////////////////////////////////////////////////////////////
+
+function fakeGameFrom(model) {
+  function fakeInputManager() {
+    this.on = voidFn;
+  }
+
+  function fakeActuator() {
+    this.actuate = voidFn;
+  }
+
+  let gameManager = new GameManager(
+    model.grid.size,
+    fakeInputManager,
+    fakeActuator,
+    function fakeStorageManager() {
+      this.getGameState = function () {
+        return model;
+      };
+
+      this.clearGameState = voidFn;
+      this.getBestScore = voidFn;
+      this.setGameState = voidFn;
+    }
+  );
+
+  return gameManager;
+}
+
+function imitateMove(model, move) {
+  let gameManager = fakeGameFrom(model);
+  let internalMove = MOVE_KEY_MAP[move];
+
+  gameManager.actuate = voidFn;
+  gameManager.keepPlaying = true;
+  gameManager.move(internalMove);
+
+  let serialized = gameManager.serialize();
+
+  // Object.freeze(serialized);
+
+  return {
+    move,
+    score: gameManager.score,
+    model: serialized,
+    // NOTE: the score is not updated for the fake manager
+    // wasMoved: serialized.score !== model.score,
+    wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
+  };
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Worker-related code
+/////////////////////////////////////////////////////////////////////////
+
 function run(game, maxLevel) {
-  Object.freeze(game.grid);
+  // Object.freeze(game.grid);
 
   console.groupCollapsed('Calculate Move');
   console.time('Time');
