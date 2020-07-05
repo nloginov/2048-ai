@@ -288,7 +288,9 @@ class Model {
     //   https://codepen.io/Samid737/pen/opmvaR
     //   https://github.com/karpathy/reinforcejs
 
-    importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
+    importScripts(
+      'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
+    );
 
     let spec = {
       update: 'qlearn', // qlearn | sarsa algorithm
