@@ -1,6 +1,6 @@
 /* global importScripts, RL */
 importScripts(
-  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
+  'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
 );
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
