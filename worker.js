@@ -122,7 +122,7 @@ function treeAI(model, maxLevel) {
   let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
   let bestNode = sortedLeaves[0];
 
-  return bestNode.root && bestNode.root.move;
+  return bestNode.root ? bestNode.root.move : bestNode.move;
 }
 
 function run(game, maxLevel) {
