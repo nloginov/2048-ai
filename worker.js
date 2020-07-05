@@ -78,7 +78,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 15 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (level >= 8 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
