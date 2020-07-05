@@ -60,7 +60,11 @@ function treeAI(model, maxLevel) {
   }
 
   function expandTree(node, level) {
-    if (level >= 14 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (node.value.wasMoved) {
+      updateBest(node);
+    }
+
+    if (level >= 7 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
@@ -75,6 +79,7 @@ function treeAI(model, maxLevel) {
         value: moveData,
         children: [],
         move: move,
+        moveName: MOVE_NAMES_MAP[move],
         parent: node,
       };
 
@@ -85,10 +90,6 @@ function treeAI(model, maxLevel) {
 
     for (let childNode of node.children) {
       expandTree(childNode, level + 1);
-    }
-
-    if (node.value.wasMoved) {
-      updateBest(node);
     }
   }
 
