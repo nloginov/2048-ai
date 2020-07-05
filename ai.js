@@ -175,7 +175,8 @@ function biggestTile(game) {
   return { value, num: VALUE_MAP[value] };
 }
 
-function boot() {
+// eslint-disable-next-line
+function boot_old() {
   function keydown(k) {
     let oEvent = document.createEvent('KeyboardEvent');
 
@@ -202,6 +203,7 @@ function boot() {
     document.dispatchEvent(oEvent);
   }
 
+  // eslint-disable-next-line
   function runAI() {
     function runAlgorithm() {
       let model = JSON.parse(localStorage.getItem('gameState'));
@@ -241,18 +243,45 @@ function boot() {
 
     requestIdleCallback(runAlgorithm);
   }
+}
 
-  function installUI() {
-    let run = document.createElement('button');
+function installUI(worker) {
+  let run = document.createElement('button');
 
-    run.innerText = 'Run A.I.';
-    run.style = 'position: fixed; top: 1rem; left: 1rem;';
-    run.addEventListener('click', () => runAI());
+  run.innerText = 'Run A.I.';
+  run.style = 'position: fixed; top: 1rem; left: 1rem;';
 
-    document.body.appendChild(run);
-  }
+  run.addEventListener('click', () => worker.postMessage('run'));
 
-  installUI();
+  document.body.appendChild(run);
+}
+
+function handleWorkerMessage(e) {
+  console.log('Received', e);
+}
+
+async function installWorker(onMessage) {
+  // fetching the URL instead of directly loading in a script
+  // tag allows us to get around CORS issues
+  let workerUrl =
+    'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/worker.js';
+
+  let response = await fetch(workerUrl);
+  let script = await response.text();
+  let blob = new Blob([script], { type: 'text/javascript' });
+  let worker = new Worker(URL.createObjectURL(blob));
+
+  worker.onMessage = onMessage;
+
+  return worker;
+}
+
+async function boot() {
+  let worker = await installWorker(handleWorkerMessage);
+
+  installUI(worker);
+
+  worker.postMessage('ready');
 }
 
 boot();
