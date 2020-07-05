@@ -18,7 +18,6 @@ const MOVE_NAMES_MAP = {
 
 const voidFn = () => undefined;
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
-// eslint-disable-next-line
 const isEqual = (a, b) => {
   // a and b have the same dimensions
   for (let i = 0; i < a.length; i++) {
@@ -75,8 +74,9 @@ function imitateMove(model, move) {
     move,
     score: gameManager.score,
     model: serialized,
-    wasMoved: serialized.score !== model.score,
-    // !isEqual(serialized.grid.cells, model.grid.cells),
+    // NOTE: the score is not updated for the fake manager
+    // wasMoved: serialized.score !== model.score,
+    wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
   };
 }
 
