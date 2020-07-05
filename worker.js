@@ -99,7 +99,10 @@ function treeAI(model, maxLevel) {
 
     // this is effectively (4 * (up to 14)) ^ 3
     for (let move of ALL_MOVES) {
-      let maxVariance = Math.min(Math.round(countEmptySpaces(node.value)), 4);
+      let maxVariance = Math.min(
+        Math.round(countEmptySpaces(node.value.model)),
+        4
+      );
 
       for (let variance = 0; variance < maxVariance; variance++) {
         let copyOfModel = clone(node.value);
@@ -222,6 +225,20 @@ function runAStar(game, maxLevel) {
 class Model {
   constructor() {
     this.createNetwork();
+  }
+
+  predict(states) {
+    return tf.tidy(() => this.network.predict(states));
+  }
+
+  async train(xBatch, yBatch) {
+    await this.network.fit(xBatch, yBatch);
+  }
+
+  async chooseMove(state) {
+    return tf.tidy(() => {
+      return this.network.predict(state).argMax(1).dataSync()[0];
+    });
   }
 
   createNetwork() {
