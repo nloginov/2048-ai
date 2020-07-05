@@ -170,18 +170,32 @@ function imitateMove(model, move) {
 // Worker-related code
 /////////////////////////////////////////////////////////////////////////
 
-function run(game, maxLevel) {
+function runAStar(game, maxLevel) {
   // Object.freeze(game.grid);
 
   console.groupCollapsed('Calculate Move');
   console.time('Time');
 
-  let move = treeAI(game, maxLevel);
+  let move = treeAI(game, Math.max(maxLevel, 3));
 
   console.timeEnd('Time');
   console.groupEnd('Calculate Move');
 
   self.postMessage({ type: 'move', move });
+}
+
+function runRNN() {}
+
+function run({ game, maxLevel, algorithm }) {
+  switch (algorithm) {
+    case 'A*':
+      return runAStar(game, maxLevel);
+    case 'RNN':
+      return runRNN(game);
+    default:
+      console.error(...arguments);
+      throw new Error('Unrecognized Algorithm', algorithm);
+  }
 }
 
 self.onmessage = function (e) {
@@ -193,7 +207,7 @@ self.onmessage = function (e) {
 
     case 'run':
       // it's possible to have ~ 3 moves of nothing happening
-      return run(data.game, Math.max(data.maxLevel, 3));
+      return run(data);
     default:
       console.error(data);
       throw new Error('Unrecognized Message');

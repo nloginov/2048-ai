@@ -100,7 +100,7 @@ class AIWorker {
     }
   }
 
-  requestNextMove(game) {
+  requestNextMove(game, algorithm) {
     let biggest = biggestTile(game).num;
 
     console.warn(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
@@ -108,6 +108,7 @@ class AIWorker {
     this.send({
       type: 'run',
       game,
+      algorithm,
       maxLevel: Math.max(biggest - 3, 1),
     });
   }
@@ -118,7 +119,7 @@ class UI {
     let ui = new UI();
 
     container.ui = ui;
-    container.ui.addRunButton();
+    container.ui.setup();
 
     return ui;
   }
@@ -130,22 +131,32 @@ class UI {
     this.keyDown = this.keyDown.bind(this);
   }
 
-  addRunButton() {
-    let run = document.createElement('button');
+  setup() {
+    let buttons = document.createElement('div');
+    let runAStar = document.createElement('button');
+    let runRNN = document.createElement('button');
 
-    run.innerText = 'Run A.I. (A*)';
-    run.style = 'position: fixed; top: 1rem; left: 1rem;';
+    buttons.style = `
+     display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
+     position: fixed; top: 0.5rem; left: 0.5rem`;
 
-    run.addEventListener('click', () => this.runAI());
+    runAStar.innerText = 'Run A.I. (A*)';
+    runRNN.innerText = 'Run A.I. (RNN)';
 
-    document.body.appendChild(run);
+    runAStar.addEventListener('click', () => this.runAI('A*'));
+    runRNN.addEventListener('click', () => this.runAI('RNN'));
+
+    buttons.appendChild(runAStar);
+    buttons.appendChild(runRNN);
+
+    document.body.appendChild(buttons);
   }
 
-  runAI() {
+  runAI(algorithm) {
     let model = JSON.parse(localStorage.getItem('gameState'));
 
     if (model !== null && !model.over) {
-      container.ai.requestNextMove(model);
+      container.ai.requestNextMove(model, algorithm);
     }
   }
 
