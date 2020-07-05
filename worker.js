@@ -56,7 +56,7 @@ function treeAI(model, maxLevel) {
     }
 
     bestNode = root;
-    bestScore = childNode.value.score;
+    bestScore = childNode.weightedScore || 0;
   }
 
   function expandTree(node, level) {
