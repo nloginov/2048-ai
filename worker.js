@@ -2,7 +2,10 @@
 // importScripts(
 //   'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
 // );
-importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
+importScripts(
+  'https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js',
+  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/game-backup/dist/js/maps/app.js'
+);
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -188,9 +191,9 @@ function fakeGameFrom(model) {
 
   let gameManager = new GameManager(
     model.grid.size,
-    new FakeInputManager(),
-    new FakeActuator(),
-    new FakeStorage()
+    FakeInputManager,
+    FakeActuator,
+    FakeStorage
   );
 
   return gameManager;
