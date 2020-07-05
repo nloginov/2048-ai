@@ -94,6 +94,12 @@ function treeAI(model, maxLevel) {
     }
 
     if (hops < bestHops) {
+      console.debug('Best Possible Move', {
+        hops,
+        bestHops,
+        root,
+        score: childNode.weightedScore,
+      });
       bestHops = hops;
       bestNode = root;
       bestScore = childNode.weightedScore || 0;
@@ -282,7 +288,9 @@ class Model {
     //   https://codepen.io/Samid737/pen/opmvaR
     //   https://github.com/karpathy/reinforcejs
 
-    importScripts('https://cdn.jsdelivr.net/npm/reinforce-js@1/dist/index.js');
+    importScripts(
+      'https://cdn.jsdelivr.net/combine/npm/reinforce-js@1.5.1,npm/reinforce-js@1.5.1/dist/env.min.js,npm/reinforce-js@1.5.1/dist/solver.min.js,npm/reinforce-js@1.5.1/dist/opt.min.js,npm/reinforce-js@1.5.1/dist/td/td-env.min.js,npm/reinforce-js@1.5.1/dist/td/td-opt.min.js,npm/reinforce-js@1.5.1/dist/td/td-solver.min.js,npm/reinforce-js@1.5.1/dist/dqn/dqn-env.min.js,npm/reinforce-js@1.5.1/dist/dqn/dqn-opt.min.js,npm/reinforce-js@1.5.1/dist/dqn/dqn-solver.min.js,npm/reinforce-js@1.5.1/dist/dqn/sarsa.min.js'
+    );
 
     let spec = {
       update: 'qlearn', // qlearn | sarsa algorithm
