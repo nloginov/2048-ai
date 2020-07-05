@@ -103,7 +103,7 @@ function treeAI(model, maxLevel) {
       expandTree(childNode, level + 1);
     }
 
-    if (node.children.length === 0) {
+    if (node.children.length === 0 && node.value.wasMoved) {
       leaves.push(node);
     }
   }
@@ -125,13 +125,25 @@ function treeAI(model, maxLevel) {
     bestNode = bestNode.parent;
   }
 
+  console.debug(`Best Move: ${bestMove} aka ${MOVE_KEY_MAP[bestMove]}`);
+  console.debug(`out of ${leaves.length} options`);
+  console.debug(
+    `with expected score change of ${model.score} => ${bestNode.value.score}`
+  );
+
   return bestMove;
 }
 
 function run(game, maxLevel) {
   Object.freeze(game);
 
+  console.group('Calculate Move');
+  console.time('Time');
+
   let move = treeAI(game, maxLevel);
+
+  console.timeEnd('Time');
+  console.groupEnd('Calculate Move');
 
   self.postMessage({ type: 'move', move });
 }
