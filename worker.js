@@ -111,7 +111,7 @@ function treeAI(model, maxLevel) {
     for (let move of ALL_MOVES) {
       let maxVariance = Math.min(
         Math.round(countEmptySpaces(node.value.model)),
-        1
+        4
       );
 
       for (let variance = 0; variance <= maxVariance; variance++) {
