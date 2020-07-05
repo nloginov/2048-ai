@@ -132,6 +132,7 @@ class UI {
     // blegh, can't wait for decorators to land
     this.addRunButton = this.addRunButton.bind(this);
     this.runAI = this.runAI.bind(this);
+    this.keyDown = this.keyDown.bind(this);
   }
 
   addRunButton() {
@@ -153,7 +154,7 @@ class UI {
     }
   }
 
-  keydown(k) {
+  keyDown(k) {
     let oEvent = document.createEvent('KeyboardEvent');
 
     function defineConstantGetter(name, value) {
