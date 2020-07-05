@@ -90,7 +90,7 @@ function treeAI(model, maxLevel) {
     }
 
     if (hops < bestHops) {
-      bestHops = 0;
+      bestHops = hops;
       bestNode = root;
       bestScore = childNode.weightedScore || 0;
     }
