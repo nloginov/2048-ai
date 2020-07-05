@@ -1,20 +1,9 @@
-// NOTE: original code from:
-// https://github.com/nloginov/2048-ai
-/* global GameManager */
+// NOTE: decorators do not exist in browsers, so we can't
+//       use any sort of fancy auto-"bind" decoration :(
+// poor man's Dependency Injection
+const container = {};
 
-var AI = {};
-AI.MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
-
-const ALL_MOVES = [AI.MOVE.UP, AI.MOVE.RIGHT, AI.MOVE.DOWN, AI.MOVE.LEFT];
-
-const MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
-
-const MOVE_KEY_MAP = {
-  [AI.MOVE.UP]: 0,
-  [AI.MOVE.RIGHT]: 1,
-  [AI.MOVE.DOWN]: 2,
-  [AI.MOVE.LEFT]: 3,
-};
+// const MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
 
 const VALUE_MAP = {
   2: 1,
@@ -51,120 +40,6 @@ const DOCTOR_NUMBER_MAP = {
   14: '13 - Jodie Whittaker',
 };
 
-const voidFn = () => undefined;
-const clone = (obj) => JSON.parse(JSON.stringify(obj));
-const isEqual = (a, b) => {
-  // a and b have the same dimensions
-  for (let i = 0; i < a.length; i++) {
-    for (let j = 0; j < b.length; j++) {
-      if (a[i][j] !== b[i][j]) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-};
-
-function fakeGameFrom(model) {
-  function fakeInputManager() {
-    this.on = voidFn;
-  }
-
-  function fakeActuator() {
-    this.actuate = voidFn;
-  }
-
-  let gameManager = new GameManager(
-    model.grid.size,
-    fakeInputManager,
-    fakeActuator,
-    function fakeStorageManager() {
-      this.getGameState = function () {
-        return model;
-      };
-
-      this.clearGameState = voidFn;
-      this.getBestScore = voidFn;
-      this.setGameState = voidFn;
-    }
-  );
-
-  return gameManager;
-}
-
-AI.Service = {
-  imitateMove: (function () {
-    return function makeMove(model, move) {
-      let gameManager = fakeGameFrom(model);
-      let internalMove = MOVE_KEY_MAP[move];
-
-      gameManager.actuate = voidFn;
-      gameManager.keepPlaying = true;
-      gameManager.move(internalMove);
-
-      let serialized = gameManager.serialize();
-
-      return {
-        move,
-        score: gameManager.score,
-        model: clone(serialized),
-        wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
-      };
-    };
-  })(),
-};
-
-function treeAI(model, maxLevel) {
-  let leaves = [];
-
-  function expandTree(node, level, root) {
-    if (level === maxLevel) {
-      return leaves.push(node);
-    }
-
-    for (let move of ALL_MOVES) {
-      let copyOfModel = clone(node.value);
-      let moveData = AI.Service.imitateMove(copyOfModel.model, move);
-
-      let newNode = {
-        // penalize scores with higher depth
-        // also, add one to both level and maxLevel to avoid division by 0
-        weightedScore: moveData.score / ((level + 1) / (maxLevel + 1)),
-        value: moveData,
-        children: [],
-        move: move,
-        parent: node,
-        root,
-      };
-
-      if (newNode.value.wasMoved) {
-        node.children.push(newNode);
-      }
-    }
-
-    for (let childNode of node.children) {
-      expandTree(childNode, level + 1, root && root.move ? root : node);
-    }
-
-    if (node.children.length === 0) {
-      leaves.push(node);
-    }
-  }
-
-  let rootNode = {
-    value: { model },
-    children: [],
-  };
-
-  expandTree(rootNode, 0);
-
-  let sortedLeaves = leaves.sort((a, b) => b.weightedScore - a.weightedScore);
-  let bestNode = sortedLeaves[0];
-
-  return bestNode.root && bestNode.root.move;
-}
-
 function biggestTile(game) {
   let tiles = game.grid.cells
     .map((row) => row.map((cell) => (cell ? cell.value : 1)))
@@ -175,9 +50,103 @@ function biggestTile(game) {
   return { value, num: VALUE_MAP[value] };
 }
 
-// eslint-disable-next-line
-function boot_old() {
-  function keydown(k) {
+class AIWorker {
+  static async create() {
+    let ai = new AIWorker();
+
+    container.ai = ai;
+    await container.ai.setup();
+
+    return ai;
+  }
+
+  constructor() {
+    // blegh, can't wait for decorators to land
+    this.setup = this.setup.bind(this);
+    this.send = this.send.bind(this);
+    this.onMessage = this.onMessage.bind(this);
+    this.requestNextMove = this.requestNextMove.bind(this);
+  }
+
+  async setup() {
+    // fetching the URL instead of directly loading in a script
+    // tag allows us to get around CORS issues
+    let workerUrl =
+      'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/worker.js';
+
+    let response = await fetch(workerUrl);
+    let script = await response.text();
+    let blob = new Blob([script], { type: 'text/javascript' });
+
+    this.worker = new Worker(URL.createObjectURL(blob));
+    this.worker.onMessage = this.onMessage;
+  }
+
+  send(data) {
+    this.worker.postMessage(data);
+  }
+
+  onMessage(e) {
+    let { data } = e;
+
+    switch (data.type) {
+      case 'ack':
+        console.debug(`Received: ${JSON.stringify(data)}`);
+
+        return;
+      case 'move':
+        return container.ui.keyDown(data.move);
+      default:
+        console.error(data);
+        throw new Error('Unrecognized Message');
+    }
+  }
+
+  requestNextMove(game) {
+    let biggest = biggestTile(game).num;
+
+    console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+
+    this.send({ game, maxLevel: Math.max(biggest - 3, 1) });
+  }
+}
+
+class UI {
+  static async create() {
+    let ui = new UI();
+
+    container.ui = ui;
+    container.ui.addRunButton();
+
+    return ui;
+  }
+
+  constructor() {
+    // blegh, can't wait for decorators to land
+    this.addRunButton = this.addRunButton.bind(this);
+    this.runAI = this.runAI.bind(this);
+  }
+
+  addRunButton() {
+    let run = document.createElement('button');
+
+    run.innerText = 'Run A.I.';
+    run.style = 'position: fixed; top: 1rem; left: 1rem;';
+
+    run.addEventListener('click', () => this.runAI());
+
+    document.body.appendChild(run);
+  }
+
+  runAI() {
+    let model = JSON.parse(localStorage.getItem('gameState'));
+
+    if (model !== null && !model.over) {
+      container.ai.requestNextMove(model);
+    }
+  }
+
+  keydown(k) {
     let oEvent = document.createEvent('KeyboardEvent');
 
     function defineConstantGetter(name, value) {
@@ -201,87 +170,16 @@ function boot_old() {
     /* eslint-enable */
 
     document.dispatchEvent(oEvent);
+
+    this.runAI();
   }
-
-  // eslint-disable-next-line
-  function runAI() {
-    function runAlgorithm() {
-      let model = JSON.parse(localStorage.getItem('gameState'));
-
-      if (model !== null) {
-        console.group('Board State');
-        console.debug(model);
-        let biggest = biggestTile(model).num;
-
-        console.debug(
-          `Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`
-        );
-
-        console.time('calculating best move');
-        let aiMove = treeAI(model, Math.max(biggest - 3, 1));
-
-        console.timeEnd('calculating best move');
-
-        console.debug('Best Move: ', MOVE_MAP[aiMove]);
-        console.groupEnd();
-
-        if (!model.over) {
-          // calculating the move could take a while,
-          // be kind to the browser and issue a dom-changing event
-          // next time we're idle
-          requestIdleCallback(() => {
-            keydown(aiMove);
-
-            // allow time for the animation
-            setTimeout(() => {
-              requestAnimationFrame(runAlgorithm);
-            }, 100);
-          });
-        }
-      }
-    }
-
-    requestIdleCallback(runAlgorithm);
-  }
-}
-
-function installUI(worker) {
-  let run = document.createElement('button');
-
-  run.innerText = 'Run A.I.';
-  run.style = 'position: fixed; top: 1rem; left: 1rem;';
-
-  run.addEventListener('click', () => worker.postMessage('run'));
-
-  document.body.appendChild(run);
-}
-
-function handleWorkerMessage(e) {
-  console.log('Received', e);
-}
-
-async function installWorker(onMessage) {
-  // fetching the URL instead of directly loading in a script
-  // tag allows us to get around CORS issues
-  let workerUrl =
-    'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/worker.js';
-
-  let response = await fetch(workerUrl);
-  let script = await response.text();
-  let blob = new Blob([script], { type: 'text/javascript' });
-  let worker = new Worker(URL.createObjectURL(blob));
-
-  worker.onMessage = onMessage;
-
-  return worker;
 }
 
 async function boot() {
-  let worker = await installWorker(handleWorkerMessage);
+  await AIWorker.create();
+  await UI.create();
 
-  installUI(worker);
-
-  worker.postMessage('ready');
+  container.worker.postMessage({ type: 'ready' });
 }
 
 boot();
