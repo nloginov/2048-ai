@@ -1,7 +1,10 @@
 // NOTE: decorators do not exist in browsers, so we can't
 //       use any sort of fancy auto-"bind" decoration :(
 // poor man's Dependency Injection
-const container = {};
+const container = {
+  ui: undefined,
+  ai: undefined,
+};
 
 // const MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
 
@@ -179,7 +182,7 @@ async function boot() {
   await AIWorker.create();
   await UI.create();
 
-  container.worker.postMessage({ type: 'ready' });
+  container.ai.send({ type: 'ready' });
 }
 
 boot();
