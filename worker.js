@@ -91,7 +91,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 4 || level > maxLevel || node.weightedScore >= bestScore) {
+    if (level >= 5 || level > maxLevel || node.weightedScore >= bestScore) {
       return;
     }
 
@@ -99,7 +99,7 @@ function treeAI(model, maxLevel) {
     for (let move of ALL_MOVES) {
       let maxVariance = Math.min(
         Math.round(countEmptySpaces(node.value.model)),
-        4
+        1
       );
 
       for (let variance = 0; variance <= maxVariance; variance++) {
@@ -223,7 +223,56 @@ class Model {
     this.createNetwork();
   }
 
-  train() {}
+  train() {
+    let game = this.initialGame;
+
+    const step = async (board) => {
+      return await this.academy.step([
+        { teacherName: this.teacher, agentsInput: board },
+      ]);
+    };
+
+    const calculateReward = (move, clone) => {
+      let moveData = imitateMove(clone, move);
+
+      if (moveData.wasMoved) {
+        return 0;
+      }
+
+      if (moveData.score > game.score) {
+        return 1;
+      }
+
+      return -1;
+    };
+
+    const update = async () => {
+      let clone = clone(game);
+      let inputs = clone.grid.cells
+        .flat()
+        .map((cell) => (cell ? cell.value : cell));
+
+      await step(inputs);
+
+      let action = this.academy.agents.get(this.agent).actionsBuffer[0];
+
+      console.log(action);
+
+      let move = ALL_MOVES(action);
+
+      let reward = calculateReward(move, clone);
+
+      game = clone;
+
+      this.academy.addRewardToAgent(this.agent, reward);
+
+      if (!game.over) {
+        requestIdleCallback(() => update());
+      }
+    };
+
+    requestIdleCallback(() => update());
+  }
 
   createNetwork() {
     // followed:
