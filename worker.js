@@ -1,4 +1,7 @@
 /* global importScripts, RL */
+importScripts(
+  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
+);
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -290,10 +293,6 @@ class Model {
     // followed:
     //   https://codepen.io/Samid737/pen/opmvaR
     //   https://github.com/karpathy/reinforcejs
-
-    importScripts(
-      'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
-    );
 
     let spec = {
       update: 'qlearn', // qlearn | sarsa algorithm
