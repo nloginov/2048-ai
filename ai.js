@@ -179,7 +179,9 @@ class UI {
 
     document.dispatchEvent(oEvent);
 
-    this.runAI();
+    setTimeout(() => {
+      this.runAI();
+    }, 100);
   }
 }
 
