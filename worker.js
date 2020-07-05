@@ -51,7 +51,7 @@ function treeAI(model, maxLevel) {
 
     let root = childNode;
 
-    while (root.parent !== undefined) {
+    while (root.parent !== undefined && root.parent.move) {
       root = root.parent;
     }
 

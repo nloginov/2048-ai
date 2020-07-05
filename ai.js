@@ -87,6 +87,12 @@ class AIWorker {
 
         return;
       case 'move':
+        if (!data.move) {
+          console.error(`No move was generated`, data);
+
+          return;
+        }
+
         return container.ui.keyDown(data.move);
       default:
         console.error(data);
@@ -97,7 +103,7 @@ class AIWorker {
   requestNextMove(game) {
     let biggest = biggestTile(game).num;
 
-    console.info(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+    console.warn(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
     this.send({
       type: 'run',
