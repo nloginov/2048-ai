@@ -1,7 +1,6 @@
 // NOTE: original code from:
 // https://github.com/nloginov/2048-ai
 
-const AI = {};
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
 const MOVE_KEY_MAP = {
@@ -53,27 +52,25 @@ function fakeGameFrom(model) {
   return gameManager;
 }
 
-AI.Service = {
-  imitateMove: (function () {
-    return function makeMove(model, move) {
-      let gameManager = fakeGameFrom(model);
-      let internalMove = MOVE_KEY_MAP[move];
+function imitateMove(model, move) {
+  let gameManager = fakeGameFrom(model);
+  let internalMove = MOVE_KEY_MAP[move];
 
-      gameManager.actuate = voidFn;
-      gameManager.keepPlaying = true;
-      gameManager.move(internalMove);
+  gameManager.actuate = voidFn;
+  gameManager.keepPlaying = true;
+  gameManager.move(internalMove);
 
-      let serialized = gameManager.serialize();
+  let serialized = gameManager.serialize();
 
-      return {
-        move,
-        score: gameManager.score,
-        model: clone(serialized),
-        wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
-      };
-    };
-  })(),
-};
+  Object.freeze(serialized);
+
+  return {
+    move,
+    score: gameManager.score,
+    model: serialized,
+    wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
+  };
+}
 
 function treeAI(model, maxLevel) {
   let leaves = [];
@@ -85,7 +82,7 @@ function treeAI(model, maxLevel) {
 
     for (let move of ALL_MOVES) {
       let copyOfModel = clone(node.value);
-      let moveData = AI.Service.imitateMove(copyOfModel.model, move);
+      let moveData = imitateMove(copyOfModel.model, move);
 
       let newNode = {
         // penalize scores with higher depth
@@ -132,6 +129,8 @@ function treeAI(model, maxLevel) {
 }
 
 function run(game, maxLevel) {
+  Object.freeze(game);
+
   let move = treeAI(game, maxLevel);
 
   self.postMessage({ type: 'move', move });
