@@ -21,7 +21,12 @@ const isEqual = (a, b) => {
   // a and b have the same dimensions
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < b.length; j++) {
-      if (a[i][j].value !== b[i][j].value) {
+      let av = a[i][j];
+      let bv = b[i][j];
+      let avv = av && av.value;
+      let bvv = bv && bv.value;
+
+      if (avv !== bvv) {
         return false;
       }
     }
@@ -195,17 +200,40 @@ function runAStar(game, maxLevel) {
 }
 
 function runRNN() {
+  // followed: https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
+
   // below code is under worker environment
   // to import tfjs into worker from a cdn
   importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
-  // create 2 tensors and add them up
-  const a = tf.ones([2, 2]);
-  const b = tf.ones([2, 2]);
 
-  let c = a.add(b);
+  let hiddenLayer = tf.layers.dense({
+    // inner neurons
+    units: 16,
+    // inputs, one for each of the grid spaces
+    inputShape: [16],
+    activation: 'sigmoid',
+    kernelInitializer: 'leCunNormal',
+    biasInitializer: 'randomNormal',
+    useBias: true,
+  });
 
-  // post back the result
-  self.postMessage({ data: c.dataSync() });
+  // one output for each of Left, Right, Up, Down
+  let outputLayer = tf.layers.dense({ units: 4 });
+
+  let model = tf.sequential();
+
+  model.add(hiddenLayer);
+  model.add(outputLayer);
+
+  model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
+
+  // normalized to 0-1
+  let output = 0;
+
+  let moveIndex = Math.round(output * 4);
+  let move = ALL_MOVES[moveIndex];
+
+  self.postMessage({ type: 'move', move });
 }
 
 function run({ game, maxLevel, algorithm }) {
