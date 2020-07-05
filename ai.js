@@ -129,6 +129,7 @@ class UI {
     this.setup = this.setup.bind(this);
     this.runAI = this.runAI.bind(this);
     this.keyDown = this.keyDown.bind(this);
+    this.requestNextMove = this.requestNextMove.bind(this);
   }
 
   setup() {
@@ -153,10 +154,16 @@ class UI {
   }
 
   runAI(algorithm) {
+    this.algorithm = algorithm;
+
+    this.requestNextMove();
+  }
+
+  requestNextMove() {
     let model = JSON.parse(localStorage.getItem('gameState'));
 
     if (model !== null && !model.over) {
-      container.ai.requestNextMove(model, algorithm);
+      container.ai.requestNextMove(model, this.algorithm);
     }
   }
 
@@ -186,7 +193,7 @@ class UI {
     document.dispatchEvent(oEvent);
 
     setTimeout(() => {
-      this.runAI();
+      this.requestNextMove();
     }, 100);
   }
 }

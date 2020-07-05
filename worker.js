@@ -173,13 +173,12 @@ function imitateMove(model, move) {
 function runAStar(game, maxLevel) {
   // Object.freeze(game.grid);
 
-  console.groupCollapsed('Calculate Move');
-  console.time('Time');
+  console.debug('-------------- Calculate Move -----------------');
+  let initialTime = new Date();
 
   let move = treeAI(game, Math.max(maxLevel, 3));
 
-  console.timeEnd('Time');
-  console.groupEnd('Calculate Move');
+  console.debug(`Time: ${new Date() - initialTime}ms`);
 
   self.postMessage({ type: 'move', move });
 }
