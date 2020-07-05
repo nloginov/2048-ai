@@ -60,7 +60,7 @@ function treeAI(model, maxLevel) {
   }
 
   function expandTree(node, level) {
-    if (level >= maxLevel && node.weightedScore >= bestScore) {
+    if (level >= 14 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
@@ -107,6 +107,7 @@ function treeAI(model, maxLevel) {
   console.debug(
     `with expected score change of ${model.score} => ${bestNode.value.model.score}`
   );
+  console.debug('Search Tree:', rootNode);
 
   return bestMove;
 }
