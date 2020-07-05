@@ -314,9 +314,13 @@ class Model {
     this.agent = this.academy.addAgent({
       model: model, // Our model corresponding to the agent
       agentConfig: {
-        memorySize: 5000, // The size of the agent's memory (Q-Learning)
-        batchSize: 128, // How many tensors will be given to the network when fit
-        temporalWindow: [], // The temporal window giving previous inputs & actions
+        // The size of the agent's memory (Q-Learning)
+        memorySize: 5000,
+        // How many tensors will be given to the network when fit
+        batchSize: 128,
+        // The window of data which will be sent yo your agent
+        // For instance the x previous inputs, and what actions the agent took
+        temporalWindow: 1,
       },
     });
 
