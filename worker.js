@@ -21,7 +21,7 @@ const isEqual = (a, b) => {
   // a and b have the same dimensions
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < b.length; j++) {
-      if (a[i][j] !== b[i][j]) {
+      if (a[i][j].value !== b[i][j].value) {
         return false;
       }
     }
