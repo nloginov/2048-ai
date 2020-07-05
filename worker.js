@@ -9,9 +9,16 @@ const MOVE_KEY_MAP = {
   [MOVE.DOWN]: 2,
   [MOVE.LEFT]: 3,
 };
+const MOVE_NAMES_MAP = {
+  [MOVE.UP]: 'up',
+  [MOVE.RIGHT]: 'right',
+  [MOVE.DOWN]: 'down',
+  [MOVE.LEFT]: 'left',
+};
 
 const voidFn = () => undefined;
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
+// eslint-disable-next-line
 const isEqual = (a, b) => {
   // a and b have the same dimensions
   for (let i = 0; i < a.length; i++) {
@@ -68,7 +75,8 @@ function imitateMove(model, move) {
     move,
     score: gameManager.score,
     model: serialized,
-    wasMoved: !isEqual(serialized.grid.cells, model.grid.cells),
+    wasMoved: serialized.score !== model.score,
+    // !isEqual(serialized.grid.cells, model.grid.cells),
   };
 }
 
@@ -125,8 +133,9 @@ function treeAI(model, maxLevel) {
     bestNode = bestNode.parent;
   }
 
-  console.debug(`Best Move: ${bestMove} aka ${MOVE_KEY_MAP[bestMove]}`);
-  console.debug(`out of ${leaves.length} options`);
+  console.debug(
+    `Best Move: ${bestMove} aka ${MOVE_NAMES_MAP[bestMove]} out of ${leaves.length} options`
+  );
   console.debug(
     `with expected score change of ${model.score} => ${bestNode.value.score}`
   );

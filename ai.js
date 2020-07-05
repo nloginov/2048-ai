@@ -6,24 +6,13 @@ const container = {
   ai: undefined,
 };
 
-// const MOVE_MAP = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
-
 const VALUE_MAP = {
-  2: 1,
-  4: 2,
-  8: 3,
-  16: 4,
-  32: 5,
-  64: 6,
-  128: 7,
-  256: 8,
-  512: 9,
-  1024: 10,
-  2048: 11,
-  4096: 12,
-  8192: 13,
-  16384: 14,
-  32768: 15,
+  /* eslint-disable prettier/prettier */
+  2:     1, 4:      2, 8:      3, 16:    4,
+  32:    5, 64:     6, 128:    7, 256:   8,
+  512:   9, 1024:  10, 2048:  11, 4096: 12,
+  8192: 13, 16384: 14, 32768: 15,
+  /* eslint-enable prettier/prettier */
 };
 
 const DOCTOR_NUMBER_MAP = {
