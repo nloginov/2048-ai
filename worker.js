@@ -1,3 +1,5 @@
+/* global importScripts, tf */
+
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
 const MOVE_KEY_MAP = {
@@ -185,7 +187,19 @@ function runAStar(game, maxLevel) {
   self.postMessage({ type: 'move', move });
 }
 
-function runRNN() {}
+function runRNN() {
+  // below code is under worker environment
+  // to import tfjs into worker from a cdn
+  importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
+  // create 2 tensors and add them up
+  const a = tf.ones([2, 2]);
+  const b = tf.ones([2, 2]);
+
+  let c = a.add(b);
+
+  // post back the result
+  self.postMessage({ data: c.dataSync() });
+}
 
 function run({ game, maxLevel, algorithm }) {
   switch (algorithm) {
