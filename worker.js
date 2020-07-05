@@ -1,4 +1,4 @@
-/* global importScripts, tf */
+/* global importScripts, ReImprove */
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -60,8 +60,6 @@ const countEmptySpaces = (game) => {
  *
  */
 function treeAI(model, maxLevel) {
-  let leaves = [];
-
   let bestNode;
   let treeSize = 0;
   let bestScore = 0;
@@ -93,11 +91,11 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 4 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (level >= 4 || level > maxLevel || node.weightedScore >= bestScore) {
       return;
     }
 
-    // this is effectively (4 * (up to 14)) ^ 3
+    // this is effectively (4 * (up to 4)) ^ 3
     for (let move of ALL_MOVES) {
       let maxVariance = Math.min(
         Math.round(countEmptySpaces(node.value.model)),
@@ -114,7 +112,7 @@ function treeAI(model, maxLevel) {
 
         treeSize++;
 
-        let newNode = {
+        node.children.push({
           // penalize scores with higher depth
           // this takes the nth root of the score where n is the number of moves
           weightedScore: Math.pow(moveData.score, 1 / (level + 1)),
@@ -123,11 +121,7 @@ function treeAI(model, maxLevel) {
           move: move,
           moveName: MOVE_NAMES_MAP[move],
           parent: node,
-        };
-
-        if (newNode.value.wasMoved) {
-          node.children.push(newNode);
-        }
+        });
       }
     }
 
@@ -141,7 +135,7 @@ function treeAI(model, maxLevel) {
   let bestMove = bestNode.move;
 
   console.debug(
-    `Best Move: ${bestMove} aka ${MOVE_NAMES_MAP[bestMove]} out of ${leaves.length} options`
+    `Best Move: ${bestMove} aka ${MOVE_NAMES_MAP[bestMove]} out of ${treeSize} options`
   );
   console.debug(
     `with expected score change of ${model.score} => ${bestNode.value.model.score}`
@@ -223,74 +217,67 @@ function runAStar(game, maxLevel) {
 }
 
 class Model {
-  constructor() {
+  constructor(initialGame) {
+    this.initialGame = initialGame;
+
     this.createNetwork();
   }
 
-  predict(states) {
-    return tf.tidy(() => this.network.predict(states));
-  }
-
-  async train(xBatch, yBatch) {
-    await this.network.fit(xBatch, yBatch);
-  }
-
-  async chooseMove(state) {
-    return tf.tidy(() => {
-      return this.network.predict(state).argMax(1).dataSync()[0];
-    });
-  }
+  train() {}
 
   createNetwork() {
     // followed:
-    //   https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
-    //   https://heartbeat.fritz.ai/automating-chrome-dinosaur-game-part-1-290578f13907
+    //   https://github.com/BeTomorrow/ReImproveJS
 
-    // below code is under worker environment
-    // to import tfjs into worker from a cdn
-    importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
-
-    let network = tf.sequential();
-
-    network.add(
-      // hidden layer
-      tf.layers.dense({
-        // inner neurons
-        units: 8,
-        // inputs, one for each of the grid spaces
-        inputShape: [4, 4],
-        activation: 'sigmoid',
-        kernelInitializer: 'leCunNormal',
-        biasInitializer: 'randomNormal',
-        useBias: true,
-      })
+    importScripts(
+      'https://cdn.jsdelivr.net/npm/reimprovejs@0/dist/reimprove.js'
     );
 
-    network.add(
-      // output layer
-      tf.layers.dense({
-        // inputs from hidden layer
-        inputShape: [8],
-        // one score output ? for each of Left, Right, Up, Down
-        units: 4,
-        activation: 'sigmoid',
-      })
-    );
+    let network = new ReImprove.NeuralNetwork();
 
-    network.summary();
+    network.InputShape = [16];
+    network.addNeuralNetworkLayers([
+      { type: 'dense', units: 16, activation: 'relu' },
+      { type: 'dense', units: 4, activation: 'softmax' },
+    ]);
 
-    network.compile({
-      loss: 'meanSquaredError',
-      optimizer: tf.train.adam(0.01 /* learning rate */),
+    let model = new ReImprove.Model.FromNetwork(network, {
+      epochs: 1,
+      stepsPerEpoch: 16,
     });
 
+    model.compile({ loss: 'meanSquareError', optimizer: 'sgd' });
+
     this.network = network;
+    this.model = model;
+
+    this.academy = new ReImprove.Academy();
+    this.teacher = this.academy.addTeacher({
+      lessonsQuantity: 10, // Number of training lessons before only testing agent
+      lessonsLength: 100, // The length of each lesson (in quantity of updates)
+      lessonsWithRandom: 2, // How many random lessons before updating epsilon's value
+      epsilon: 1, // Q-Learning values and so on ...
+      epsilonDecay: 0.995, // (Random factor epsilon, decaying over time)
+      epsilonMin: 0.05,
+      gamma: 0.8, // (Gamma = 1 : agent cares really much about future rewards)
+    });
+
+    this.agent = this.academy.addAgent({
+      model: model, // Our model corresponding to the agent
+      agentConfig: {
+        memorySize: 5000, // The size of the agent's memory (Q-Learning)
+        batchSize: 128, // How many tensors will be given to the network when fit
+        temporalWindow: [], // The temporal window giving previous inputs & actions
+      },
+    });
+
+    this.academy.assignTeacherToAgent(this.agent, this.teacher);
   }
 }
 
-function runRNN() {
+function runRNN(game) {
   if (!self.model) {
-    self.model = new Model();
+    self.model = new Model(game);
   }
 
   // normalized to 0-1
