@@ -110,7 +110,11 @@ class AIWorker {
 
     console.debug(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
 
-    this.send({ game, maxLevel: Math.max(biggest - 3, 1) });
+    this.send({
+      type: 'run',
+      game,
+      maxLevel: Math.max(biggest - 3, 1),
+    });
   }
 }
 
