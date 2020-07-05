@@ -1,4 +1,4 @@
-/* global importScripts, ReImprove */
+/* global importScripts, RL */
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -33,6 +33,10 @@ const isEqual = (a, b) => {
   }
 
   return true;
+};
+
+const gameTo1DArray = (game) => {
+  return game.grid.cells.flat().map((cell) => (cell ? cell.value : cell));
 };
 
 const countEmptySpaces = (game) => {
@@ -234,12 +238,6 @@ class Model {
     let game = this.initialGame;
     let iterations = 0;
 
-    // const step = async (board) => {
-    //   return await this.academy.step([
-    //     { teacherName: this.teacher, agentsInput: board },
-    //   ]);
-    // };
-
     const calculateReward = (move, clone) => {
       let moveData = imitateMove(clone, move);
 
@@ -258,21 +256,17 @@ class Model {
       iterations++;
 
       let clone = clone(game);
-      let inputs = clone.grid.cells
-        .flat()
-        .map((cell) => (cell ? cell.value : cell));
-
+      let inputs = gameTo1DArray(clone);
       let action = this.agent.act(inputs);
 
       let move = ALL_MOVES(action);
-
       let reward = calculateReward(move, clone);
-
-      game = clone;
 
       this.agent.learn(reward);
 
       if (!game.over || iterations < this.maxTrainingIterations) {
+        game = clone;
+
         return requestIdleCallback(() => update());
       }
 
@@ -288,65 +282,38 @@ class Model {
     //   https://codepen.io/Samid737/pen/opmvaR
     //   https://github.com/karpathy/reinforcejs
 
-    importScripts(
-      'https://cdn.jsdelivr.net/npm/reimprovejs@0/dist/reimprove.js'
-    );
+    importScripts('https://cdn.jsdelivr.net/npm/reinforce-js@1/dist/index.js');
 
-    let network = new ReImprove.NeuralNetwork();
+    let spec = {
+      update: 'qlearn', // qlearn | sarsa algorithm
+      gamma: 0.9, // discount factor, [0, 1)
+      epsilon: 0.001, // initial epsilon for epsilon-greedy policy, [0, 1)
+      alpha: 0.001, // value function learning rate
+      experience_add_every: 10, // number of time steps before we add another experience to replay memory
+      experience_size: 5000, // size of experience replay memory
+      learning_steps_per_iteration: 20,
+      tderror_clamp: 1.0, // for robustness
+      num_hidden_units: 100, // number of neurons in hidden layer
+    };
 
-    network.InputShape = [16];
-    network.addNeuralNetworkLayers([
-      { type: 'dense', units: 16, activation: 'relu' },
-      { type: 'dense', units: 4, activation: 'softmax' },
-    ]);
+    let env = {
+      getNumStates: () => 4,
+      getMaxNumActions: () => 5,
+    };
 
-    let model = new ReImprove.Model.FromNetwork(network, {
-      epochs: 1,
-      stepsPerEpoch: 16,
-    });
-
-    model.compile({ loss: 'meanSquareError', optimizer: 'sgd' });
-
-    this.network = network;
-    this.model = model;
-
-    this.academy = new ReImprove.Academy();
-    this.teacher = this.academy.addTeacher({
-      lessonsQuantity: 10, // Number of training lessons before only testing agent
-      lessonsLength: 100, // The length of each lesson (in quantity of updates)
-      lessonsWithRandom: 2, // How many random lessons before updating epsilon's value
-      epsilon: 1, // Q-Learning values and so on ...
-      epsilonDecay: 0.995, // (Random factor epsilon, decaying over time)
-      epsilonMin: 0.05,
-      gamma: 0.8, // (Gamma = 1 : agent cares really much about future rewards)
-    });
-
-    this.agent = this.academy.addAgent({
-      model: model, // Our model corresponding to the agent
-      agentConfig: {
-        // The size of the agent's memory (Q-Learning)
-        memorySize: 5000,
-        // How many tensors will be given to the network when fit
-        batchSize: 128,
-        // The window of data which will be sent yo your agent
-        // For instance the x previous inputs, and what actions the agent took
-        temporalWindow: 1,
-      },
-    });
-
-    this.academy.assignTeacherToAgent(this.agent, this.teacher);
+    this.agent = new RL.DQNAgent(env, spec);
   }
 }
 
 function runRNN(game) {
   if (!self.model) {
     self.model = new Model(game);
+    self.model.train();
   }
 
   // normalized to 0-1
-  let output = 0;
+  let moveIndex = self.model.agent.act();
 
-  let moveIndex = Math.round(output * 4);
   let move = ALL_MOVES[moveIndex];
 
   self.postMessage({ type: 'move', move });
