@@ -43,6 +43,7 @@ const gameTo1DArray = (game) => {
   return game.grid.cells.flat().map((cell) => (cell ? cell.value : cell));
 };
 
+// eslint-disable-next-line
 const countEmptySpaces = (game) => {
   let empty = 0;
 
@@ -122,12 +123,8 @@ function treeAI(model, maxLevel) {
 
     // this is effectively (4 * (up to 4)) ^ 3
     for (let move of ALL_MOVES) {
-      let maxVariance = Math.min(
-        Math.round(countEmptySpaces(node.value.model)),
-        3
-      );
-
-      for (let variance = 0; variance <= maxVariance; variance++) {
+      // check each move twice, because tiles pop in randomly
+      for (let variance = 0; variance <= 2; variance++) {
         let copyOfModel = clone(node.value);
         let moveData = imitateMove(copyOfModel.model, move);
 
