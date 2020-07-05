@@ -66,8 +66,6 @@ function treeAI(model, maxLevel) {
   let treeSize = 0;
   let bestScore = 0;
 
-  let numberOfBlankSpaces = countEmptySpaces(model);
-  let maxVariance = Math.round(numberOfBlankSpaces) + 1;
   let rootNode = {
     value: { model },
     children: [],
@@ -101,6 +99,8 @@ function treeAI(model, maxLevel) {
 
     // this is effectively (4 * (up to 14)) ^ 3
     for (let move of ALL_MOVES) {
+      let maxVariance = Math.min(Math.round(countEmptySpaces(node.value)), 4);
+
       for (let variance = 0; variance < maxVariance; variance++) {
         let copyOfModel = clone(node.value);
         let moveData = imitateMove(copyOfModel.model, move);
@@ -219,46 +219,62 @@ function runAStar(game, maxLevel) {
   self.postMessage({ type: 'move', move });
 }
 
+class Model {
+  constructor() {
+    this.createNetwork();
+  }
+
+  createNetwork() {
+    // followed:
+    //   https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
+    //   https://heartbeat.fritz.ai/automating-chrome-dinosaur-game-part-1-290578f13907
+
+    // below code is under worker environment
+    // to import tfjs into worker from a cdn
+    importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
+
+    let network = tf.sequential();
+
+    network.add(
+      // hidden layer
+      tf.layers.dense({
+        // inner neurons
+        units: 8,
+        // inputs, one for each of the grid spaces
+        inputShape: [4, 4],
+        activation: 'sigmoid',
+        kernelInitializer: 'leCunNormal',
+        biasInitializer: 'randomNormal',
+        useBias: true,
+      })
+    );
+
+    network.add(
+      // output layer
+      tf.layers.dense({
+        // inputs from hidden layer
+        inputShape: [8],
+        // one output for each of Left, Right, Up, Down
+        units: 4,
+        activation: 'sigmoid',
+      })
+    );
+
+    network.summary();
+
+    network.compile({
+      loss: 'meanSquaredError',
+      optimizer: tf.train.adam(0.01 /* learning rate */),
+    });
+
+    this.network = network;
+  }
+}
+
 function runRNN() {
-  // followed:
-  //   https://apptension.com/blog/2018/06/27/tensorflow-js-machine-learning-and-flappy-bird-frontend-artificial-intelligence/
-  //   https://heartbeat.fritz.ai/automating-chrome-dinosaur-game-part-1-290578f13907
-
-  // below code is under worker environment
-  // to import tfjs into worker from a cdn
-  importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
-
-  let model = tf.sequential();
-
-  model.add(
-    // hidden layer
-    tf.layers.dense({
-      // inner neurons
-      units: 8,
-      // inputs, one for each of the grid spaces
-      inputShape: [4, 4],
-      activation: 'sigmoid',
-      kernelInitializer: 'leCunNormal',
-      biasInitializer: 'randomNormal',
-      useBias: true,
-    })
-  );
-
-  model.add(
-    // output layer
-    tf.layers.dense({
-      // inputs from hidden layer
-      inputShape: [8],
-      // one output for each of Left, Right, Up, Down
-      units: 4,
-      activation: 'sigmoid',
-    })
-  );
-
-  model.compile({
-    loss: 'meanSquaredError',
-    optimizer: tf.train.adam(0.01 /* learning rate */),
-  });
+  if (!self.model) {
+    self.model = new Model();
+  }
 
   // normalized to 0-1
   let output = 0;
