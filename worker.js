@@ -35,6 +35,20 @@ const isEqual = (a, b) => {
   return true;
 };
 
+const countEmptySpaces = (game) => {
+  let empty = 0;
+
+  game.grid.cells.forEach((row) => {
+    row.forEach((cell) => {
+      if (!cell) {
+        empty++;
+      }
+    });
+  });
+
+  return empty;
+};
+
 /**
  * Initially, this started out as an A* algorithm, constrained by depth
  *  - original version from https://github.com/nloginov/2048-ai
@@ -51,6 +65,9 @@ function treeAI(model, maxLevel) {
   let bestNode;
   let treeSize = 0;
   let bestScore = 0;
+
+  let numberOfBlankSpaces = countEmptySpaces(model);
+  let maxVariance = Math.round(numberOfBlankSpaces) + 1;
   let rootNode = {
     value: { model },
     children: [],
@@ -78,33 +95,36 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 8 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (level >= 3 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
+    // this is effectively (4 * (up to 14)) ^ 3
     for (let move of ALL_MOVES) {
-      let copyOfModel = clone(node.value);
-      let moveData = imitateMove(copyOfModel.model, move);
+      for (let variance = 0; variance < maxVariance; variance++) {
+        let copyOfModel = clone(node.value);
+        let moveData = imitateMove(copyOfModel.model, move);
 
-      if (!moveData.wasMoved) {
-        continue;
-      }
+        if (!moveData.wasMoved) {
+          continue;
+        }
 
-      treeSize++;
+        treeSize++;
 
-      let newNode = {
-        // penalize scores with higher depth
-        // also, add one to both level and maxLevel to avoid division by 0
-        weightedScore: moveData.score, // / ((level + 1) / (maxLevel + 1)),
-        value: moveData,
-        children: [],
-        move: move,
-        moveName: MOVE_NAMES_MAP[move],
-        parent: node,
-      };
+        let newNode = {
+          // penalize scores with higher depth
+          // also, add one to both level and maxLevel to avoid division by 0
+          weightedScore: moveData.score, // / ((level + 1) / (maxLevel + 1)),
+          value: moveData,
+          children: [],
+          move: move,
+          moveName: MOVE_NAMES_MAP[move],
+          parent: node,
+        };
 
-      if (newNode.value.wasMoved) {
-        node.children.push(newNode);
+        if (newNode.value.wasMoved) {
+          node.children.push(newNode);
+        }
       }
     }
 
@@ -192,7 +212,7 @@ function runAStar(game, maxLevel) {
   console.debug('-------------- Calculate Move -----------------');
   let initialTime = new Date();
 
-  let move = treeAI(game, Math.max(maxLevel, 2));
+  let move = treeAI(game, maxLevel);
 
   console.debug(`Time: ${new Date() - initialTime}ms`);
 
