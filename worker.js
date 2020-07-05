@@ -63,6 +63,7 @@ function treeAI(model, maxLevel) {
   let bestNode;
   let treeSize = 0;
   let bestScore = 0;
+  let bestHops = 1000;
 
   let rootNode = {
     value: { model },
@@ -78,14 +79,21 @@ function treeAI(model, maxLevel) {
       return;
     }
 
+    // if the score is equal, let's choose the least hops
+
     let root = childNode;
+    let hops = 0;
 
     while (root.parent !== undefined && root.parent.move) {
       root = root.parent;
+      hops++;
     }
 
-    bestNode = root;
-    bestScore = childNode.weightedScore || 0;
+    if (hops < bestHops) {
+      bestHops = 0;
+      bestNode = root;
+      bestScore = childNode.weightedScore || 0;
+    }
   }
 
   function expandTree(node, level) {
