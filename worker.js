@@ -261,7 +261,7 @@ class Model {
       return -1;
     };
 
-    const update = async () => {
+    const update = async (resolve) => {
       iterations++;
 
       let clone = clone(game);
@@ -276,14 +276,18 @@ class Model {
       if (!game.over || iterations < this.maxTrainingIterations) {
         game = clone;
 
-        return setTimeout(() => update(), 1);
+        update(resolve);
       }
 
       console.debug('Finished Training');
+      resolve();
     };
 
     console.debug('Training');
-    setTimeout(() => update(), 1);
+
+    return new Promise((resolve) => {
+      update(resolve);
+    });
   }
 
   createNetwork() {
@@ -312,14 +316,17 @@ class Model {
   }
 }
 
-function runRNN(game) {
+async function runRNN(game) {
   if (!self.model) {
     self.model = new Model(game);
-    self.model.train();
+
+    await self.model.train();
   }
 
+  let inputs = gameTo1DArray(game);
+
   // normalized to 0-1
-  let moveIndex = self.model.agent.act();
+  let moveIndex = await self.model.agent.act(inputs);
 
   let move = ALL_MOVES[moveIndex];
 
