@@ -126,7 +126,7 @@ class UI {
 
   constructor() {
     // blegh, can't wait for decorators to land
-    this.addRunButton = this.addRunButton.bind(this);
+    this.setup = this.setup.bind(this);
     this.runAI = this.runAI.bind(this);
     this.keyDown = this.keyDown.bind(this);
   }
