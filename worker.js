@@ -104,7 +104,7 @@ function treeAI(model, maxLevel) {
         4
       );
 
-      for (let variance = 0; variance < maxVariance; variance++) {
+      for (let variance = 1; variance < maxVariance + 1; variance++) {
         let copyOfModel = clone(node.value);
         let moveData = imitateMove(copyOfModel.model, move);
 
@@ -271,7 +271,7 @@ class Model {
       tf.layers.dense({
         // inputs from hidden layer
         inputShape: [8],
-        // one output for each of Left, Right, Up, Down
+        // one score output ? for each of Left, Right, Up, Down
         units: 4,
         activation: 'sigmoid',
       })
