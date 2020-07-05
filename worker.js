@@ -2,10 +2,15 @@
 // importScripts(
 //   'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
 // );
-importScripts(
-  'https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js',
-  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/game-backup/dist/js/maps/app.js'
-);
+importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
+
+try {
+  importScripts(
+    'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/game-backup/dist/js/maps/app.js'
+  );
+} catch (e) {
+  console.error(e);
+}
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
