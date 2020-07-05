@@ -137,7 +137,7 @@ function treeAI(model, maxLevel) {
     `Best Move: ${bestMove} aka ${MOVE_NAMES_MAP[bestMove]} out of ${leaves.length} options`
   );
   console.debug(
-    `with expected score change of ${model.score} => ${bestNode.value.score}`
+    `with expected score change of ${model.score} => ${bestNode.value.model.score}`
   );
 
   return bestMove;
@@ -165,7 +165,8 @@ self.onmessage = function (e) {
       return self.postMessage({ type: 'ack' });
 
     case 'run':
-      return run(data.game, data.maxLevel);
+      // it's possible to have ~ 3 moves of nothing happening
+      return run(data.game, Math.max(data.maxLevel, 3));
     default:
       console.error(data);
       throw new Error('Unrecognized Message');
