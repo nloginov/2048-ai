@@ -44,9 +44,18 @@ function treeAI(model, maxLevel) {
   let leaves = [];
 
   let bestNode;
+  let treeSize = 0;
   let bestScore = 0;
+  let rootNode = {
+    value: { model },
+    children: [],
+  };
 
   function updateBest(childNode) {
+    if (childNode === rootNode) {
+      return;
+    }
+
     if (childNode.weightedScore < bestScore) {
       return;
     }
@@ -76,6 +85,8 @@ function treeAI(model, maxLevel) {
         continue;
       }
 
+      treeSize++;
+
       let newNode = {
         // penalize scores with higher depth
         // also, add one to both level and maxLevel to avoid division by 0
@@ -97,11 +108,6 @@ function treeAI(model, maxLevel) {
     }
   }
 
-  let rootNode = {
-    value: { model },
-    children: [],
-  };
-
   expandTree(rootNode, 0);
 
   let bestMove = bestNode.move;
@@ -112,7 +118,8 @@ function treeAI(model, maxLevel) {
   console.debug(
     `with expected score change of ${model.score} => ${bestNode.value.model.score}`
   );
-  console.debug('Search Tree:', rootNode);
+  console.debug(`Search Tree (Size: ${treeSize}):`, rootNode);
+  console.debug(`Current vs Next: `, model, bestNode);
 
   return bestMove;
 }
