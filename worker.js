@@ -171,27 +171,26 @@ function treeAI(model, maxLevel) {
 /////////////////////////////////////////////////////////////////////////
 
 function fakeGameFrom(model) {
-  function fakeInputManager() {
-    this.on = voidFn;
+  class FakeInputManager {
+    on = voidFn;
   }
 
-  function fakeActuator() {
-    this.actuate = voidFn;
+  class FakeActuator {
+    actuate = voidFn;
+  }
+
+  class FakeStorage {
+    getGameState = () => model;
+    clearGameState = voidFn;
+    getBestScore = voidFn;
+    setGameState = voidFn;
   }
 
   let gameManager = new GameManager(
     model.grid.size,
-    fakeInputManager,
-    fakeActuator,
-    function fakeStorageManager() {
-      this.getGameState = function () {
-        return model;
-      };
-
-      this.clearGameState = voidFn;
-      this.getBestScore = voidFn;
-      this.setGameState = voidFn;
-    }
+    new FakeInputManager(),
+    new FakeActuator(),
+    new FakeStorage()
   );
 
   return gameManager;
@@ -224,7 +223,7 @@ function imitateMove(model, move) {
 /////////////////////////////////////////////////////////////////////////
 
 function runAStar(game, maxLevel) {
-  // Object.freeze(game.grid);
+  Object.freeze(game.grid);
 
   console.debug('-------------- Calculate Move -----------------');
   let initialTime = new Date();
