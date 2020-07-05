@@ -94,15 +94,18 @@ function treeAI(model, maxLevel) {
     }
 
     if (hops < bestHops) {
-      console.debug('Best Possible Move', {
-        hops,
-        bestHops,
-        root,
-        score: childNode.weightedScore,
-      });
+      if (hops === 0) {
+        if (childNode.weightedScore > bestScore) {
+          bestNode = root;
+          bestScore = childNode.weightedScore;
+        }
+
+        return;
+      }
+
       bestHops = hops;
       bestNode = root;
-      bestScore = childNode.weightedScore || 0;
+      bestScore = childNode.weightedScore;
     }
   }
 
