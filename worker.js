@@ -93,7 +93,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 3 || (level >= maxLevel && node.weightedScore >= bestScore)) {
+    if (level >= 4 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
     }
 
@@ -116,8 +116,8 @@ function treeAI(model, maxLevel) {
 
         let newNode = {
           // penalize scores with higher depth
-          // also, add one to both level and maxLevel to avoid division by 0
-          weightedScore: moveData.score, // / ((level + 1) / (maxLevel + 1)),
+          // this takes the nth root of the score where n is the number of moves
+          weightedScore: Math.pow(moveData.score, 1 / (level + 1)),
           value: moveData,
           children: [],
           move: move,
