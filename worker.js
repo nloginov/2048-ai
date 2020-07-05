@@ -285,8 +285,8 @@ class Model {
 
   createNetwork() {
     // followed:
-    //   https://github.com/BeTomorrow/ReImproveJS
     //   https://codepen.io/Samid737/pen/opmvaR
+    //   https://github.com/karpathy/reinforcejs
 
     importScripts(
       'https://cdn.jsdelivr.net/npm/reimprovejs@0/dist/reimprove.js'
