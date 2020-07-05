@@ -148,8 +148,6 @@ function treeAI(model, maxLevel) {
   console.debug(
     `with expected score change of ${model.score} => ${bestNode.value.model.score}`
   );
-  console.debug(`Search Tree (Size: ${treeSize}):`, rootNode);
-  console.debug(`Current vs Next: `, model, bestNode);
 
   return bestMove;
 }
