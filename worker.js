@@ -55,14 +55,14 @@ function treeAI(model, maxLevel) {
       root = root.parent;
     }
 
-    bestNode = root;
-    bestScore = childNode.weightedScore || 0;
+    if (root.value.wasMoved) {
+      bestNode = root;
+      bestScore = childNode.weightedScore || 0;
+    }
   }
 
   function expandTree(node, level) {
-    if (node.value.wasMoved) {
-      updateBest(node);
-    }
+    updateBest(node);
 
     if (level >= 7 || (level >= maxLevel && node.weightedScore >= bestScore)) {
       return;
