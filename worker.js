@@ -350,11 +350,18 @@ function run({ game, maxLevel, algorithm }) {
 async function loadDependencies() {
   await Promise.all(
     dependencies.map(async (depUrl) => {
-      let response = await fetch(depUrl);
-      let script = await response.text();
-      let blob = new Blob([script], { type: 'text/javascript' });
+      try {
+        importScripts(depUrl);
+      } catch (e) {
+        console.error(e);
 
-      importScripts(blob);
+        let response = await fetch(depUrl);
+        let script = await response.text();
+        // let blob = new Blob([script], { type: 'text/javascript' });
+
+        // yolo
+        eval(script);
+      }
     })
   );
 
