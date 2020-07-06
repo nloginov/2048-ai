@@ -275,6 +275,13 @@ const calculateReward = (move, originalGame) => {
   }
 
   if (moveData.score > originalGame.score) {
+    console.debug(
+      'reward: ',
+      1 - originalGame.score / moveData.score,
+      originalGame.score,
+      moveData.score
+    );
+
     return 1 - originalGame.score / moveData.score;
   }
 
