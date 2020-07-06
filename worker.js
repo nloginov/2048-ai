@@ -173,7 +173,7 @@ function treeAI(model, maxLevel) {
         let scoreChange = moveData.score - model.score;
 
         // this is a very important strategy
-        let multiplier = edgeMultiplierFor(copyOfModel.model);
+        let multiplier = edgeMultiplierFor(moveData.model);
 
         let weightedScore = (scoreChange / 1 / (level * 2 + 1)) * multiplier;
 
