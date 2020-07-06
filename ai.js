@@ -211,7 +211,7 @@ class UI {
     }
 
     if (this.isGameOver) {
-      document.querySelector('.retry-buttor').click();
+      document.querySelector('.retry-button').click();
 
       setTimeout(() => this.requestNextMove(), 1000);
     }
