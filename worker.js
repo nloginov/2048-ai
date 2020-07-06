@@ -240,7 +240,6 @@ function runAStar(game, maxLevel) {
 }
 
 let rnn;
-let maxTrainingIterations = 10000;
 
 function createRnn() {
   // followed:
@@ -276,45 +275,11 @@ const calculateReward = (move, originalGame) => {
   }
 
   if (moveData.score > originalGame.score) {
-    return 1;
+    return 1 - originalGame.score / moveData.score;
   }
 
-  return -1;
+  return 0;
 };
-
-// eslint-disable-next-line
-async function train(initialGame) {
-  let game = initialGame;
-  let iterations = 0;
-
-  const update = async (clonedGame) => {
-    let inputs = gameTo1DArray(clonedGame);
-    let action = rnn.act(inputs);
-
-    let move = ALL_MOVES[action];
-    let reward = calculateReward(move, clonedGame);
-
-    rnn.learn(reward);
-  };
-
-  console.debug('Training');
-
-  return new Promise((resolve) => {
-    while (iterations < maxTrainingIterations) {
-      iterations++;
-      console.debug(`Iteration: ${iterations}`);
-      let clonedGame = clone(game);
-
-      if (clonedGame.over) {
-        clonedGame = clone(initialGame);
-      }
-
-      update(clonedGame);
-    }
-
-    resolve();
-  });
-}
 
 async function runRNN(game, trainingData) {
   Object.freeze(game.grid);
@@ -336,6 +301,7 @@ async function runRNN(game, trainingData) {
 
   rnn.learn(reward);
 
+  console.debug({ reward, move, moveName: MOVE_NAMES_MAP[move] });
   self.postMessage({ type: 'move', move, trainingData: rnn.toJSON() });
 }
 
