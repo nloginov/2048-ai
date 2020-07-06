@@ -120,32 +120,40 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 8) {
+    if (level >= 5) {
       return;
     }
 
-    for (let move of ALL_MOVES) {
-      let copyOfModel = clone(node.value);
-      let moveData = imitateMove(copyOfModel.model, move);
+    const enumerateMoves = () => {
+      for (let move of ALL_MOVES) {
+        let copyOfModel = clone(node.value);
+        let moveData = imitateMove(copyOfModel.model, move);
 
-      if (!moveData.wasMoved) {
-        continue;
+        if (!moveData.wasMoved) {
+          continue;
+        }
+
+        treeSize++;
+
+        node.children.push({
+          // penalize scores with higher depth
+          // this takes the nth root of the score where n is the number of moves
+          // weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
+          // weightedScore: moveData.score / 1 / (level * 2 + 1),
+          weightedScore: moveData.score,
+          value: moveData,
+          children: [],
+          move: move,
+          moveName: MOVE_NAMES_MAP[move],
+          parent: node,
+        });
       }
+    };
 
-      treeSize++;
-
-      node.children.push({
-        // penalize scores with higher depth
-        // this takes the nth root of the score where n is the number of moves
-        // weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
-        weightedScore: moveData.score / 1 / (level * 2 + 1),
-        value: moveData,
-        children: [],
-        move: move,
-        moveName: MOVE_NAMES_MAP[move],
-        parent: node,
-      });
-    }
+    // to try to account for misfortune
+    enumerateMoves();
+    enumerateMoves();
+    enumerateMoves();
 
     for (let childNode of node.children) {
       expandTree(childNode, level + 1);
