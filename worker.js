@@ -44,6 +44,41 @@ const gameTo1DArray = (game) => {
   return game.grid.cells.flat().map((cell) => (cell ? cell.value : 0));
 };
 
+const highestCells = (game) => {
+  let cellList = game.grid.cells.flat();
+
+  let sorted = cellList.sort((a, b) => b.value - a.value);
+
+  return sorted;
+};
+
+const cellOnEdge = (cell) => {
+  if (!cell || !cell.position) {
+    return false;
+  }
+
+  let { x, y } = cell.position;
+
+  return x === 0 || y === 0 || x === 3 || y === 3;
+};
+
+const edgeMultiplierFor = (game) => {
+  // there are always at least 2 cells
+  let [highest, secondHighest] = highestCells(game);
+
+  let multiplier = 1;
+
+  if (cellOnEdge(highest)) {
+    multiplier += 2;
+  }
+
+  if (cellOnEdge(secondHighest)) {
+    multiplier += 0.25;
+  }
+
+  return multiplier;
+};
+
 // eslint-disable-next-line
 const countEmptySpaces = (game) => {
   let empty = 0;
@@ -137,13 +172,19 @@ function treeAI(model, maxLevel) {
 
         let scoreChange = moveData.score - model.score;
 
+        // this is a very important strategy
+        let multiplier = edgeMultiplierFor(copyOfModel.model);
+
+        let weightedScore = (scoreChange / 1 / (level * 2 + 1)) * multiplier;
+
         node.children.push({
           // penalize scores with higher depth
           // this takes the nth root of the score where n is the number of moves
           // weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
           // weightedScore: moveData.score / 1 / (level * 2 + 1),
           // weightedScore: moveData.score,
-          weightedScore: scoreChange / 1 / (level * 2 + 1),
+          weightedScore,
+
           value: moveData,
           children: [],
           move: move,
