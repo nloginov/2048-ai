@@ -156,12 +156,15 @@ class UI {
     this.runAI = this.runAI.bind(this);
     this.keyDown = this.keyDown.bind(this);
     this.requestNextMove = this.requestNextMove.bind(this);
+    this.autoRetry = this.autoRetry.bind(this);
   }
 
   setup() {
     let buttons = document.createElement('div');
     let runAStar = document.createElement('button');
     let runRNN = document.createElement('button');
+    let autoRetry = document.createElement('input');
+    let autoRetryLabel = document.createElement('label');
 
     buttons.style = `
      display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
@@ -170,15 +173,44 @@ class UI {
     runAStar.innerText = 'Run A.I. (A*)';
     runRNN.innerText = 'Run A.I. (RNN)';
 
+    autoRetryLabel.innerText = 'Auto-Retry';
+    autoRetry.addEventListener('click', (e) => {
+      this.isAutoRetryEnabled = e.target.checked;
+
+      this.autoRetry();
+    });
+
     runAStar.addEventListener('click', () => this.runAI('A*'));
     runRNN.addEventListener('click', () => this.runAI('RNN'));
 
+    autoRetryLabel.prepend(autoRetry);
+
     buttons.appendChild(runAStar);
     buttons.appendChild(runRNN);
+    buttons.appendChild(autoRetryLabel);
 
     document.body.appendChild(buttons);
 
     this.buttons = [runAStar, runRNN];
+  }
+
+  get isGameOver() {
+    return Boolean(document.querySelector('.game-over'));
+  }
+
+  autoRetry() {
+    if (!this.isAutoRetryEnabled) {
+      return;
+    }
+
+    if (this.isGameOver) {
+      document.querySelector('.retry-buttor').click();
+
+      setTimeout(() => this.requestNextMove(), 1000);
+    }
+
+    // check every 10 seconds
+    setTimeout(() => this.autoRetry(), 10000);
   }
 
   runAI(algorithm) {
