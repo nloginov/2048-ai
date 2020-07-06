@@ -47,7 +47,7 @@ const gameTo1DArray = (game) => {
 const highestCells = (game) => {
   let cellList = game.grid.cells.flat();
 
-  let sorted = cellList.sort((a, b) => b.value - a.value);
+  let sorted = cellList.sort((a, b) => (b ? b.value : 0) - (a ? a.value : 0));
 
   return sorted;
 };
