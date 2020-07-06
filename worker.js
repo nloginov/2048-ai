@@ -1,13 +1,9 @@
 /* global importScripts, RL, GameManager */
-// importScripts(
-// );
 
 const dependencies = [
   'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js',
   'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/game.js',
 ];
-
-// importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -349,19 +345,13 @@ function run({ game, maxLevel, algorithm }) {
 async function loadDependencies() {
   await Promise.all(
     dependencies.map(async (depUrl) => {
-      try {
-        importScripts(depUrl);
-      } catch (e) {
-        console.error(e);
+      let response = await fetch(depUrl);
+      let script = await response.text();
+      let blob = new Blob([script], { type: 'text/javascript' });
+      let blobLink = URL.createObjectURL(blob);
 
-        let response = await fetch(depUrl);
-        let script = await response.text();
-        let blob = new Blob([script], { type: 'text/javascript' });
-        let blobLink = URL.createObjectURL(blob);
-
-        // yolo
-        importScripts(blobLink);
-      }
+      // yolo
+      importScripts(blobLink);
     })
   );
 
