@@ -120,7 +120,7 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 5) {
+    if (level >= 3) {
       return;
     }
 
