@@ -278,10 +278,7 @@ async function train(initialGame) {
     return -1;
   };
 
-  const update = async (resolve) => {
-    iterations++;
-
-    let clonedGame = clone(game);
+  const update = async (resolve, clonedGame) => {
     let inputs = gameTo1DArray(clonedGame);
     let action = rnn.act(inputs);
 
@@ -289,21 +286,21 @@ async function train(initialGame) {
     let reward = calculateReward(move, clonedGame);
 
     rnn.learn(reward);
-
-    if (!game.over || iterations < maxTrainingIterations) {
-      game = clonedGame;
-
-      update(resolve);
-    }
-
-    console.debug('Finished Training');
-    resolve();
   };
 
   console.debug('Training');
 
   return new Promise((resolve) => {
-    update(resolve);
+    while (iterations < maxTrainingIterations) {
+      iterations++;
+      let clonedGame = clone(game);
+
+      if (clonedGame.over) {
+        clonedGame = clone(initialGame);
+      }
+
+      update(resolve, clonedGame);
+    }
   });
 }
 
