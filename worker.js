@@ -323,7 +323,7 @@ async function runRNN(game, trainingData) {
     rnn = createRnn();
 
     if (trainingData) {
-      run.fromJSON(trainingData);
+      rnn.fromJSON(trainingData);
     }
   }
 
