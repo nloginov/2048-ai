@@ -122,30 +122,26 @@ function treeAI(model, maxLevel) {
       return;
     }
 
-    // this is effectively (4 * (up to 4)) ^ 3
     for (let move of ALL_MOVES) {
-      // check each move twice, because tiles pop in randomly
-      for (let variance = 0; variance <= 2; variance++) {
-        let copyOfModel = clone(node.value);
-        let moveData = imitateMove(copyOfModel.model, move);
+      let copyOfModel = clone(node.value);
+      let moveData = imitateMove(copyOfModel.model, move);
 
-        if (!moveData.wasMoved) {
-          continue;
-        }
-
-        treeSize++;
-
-        node.children.push({
-          // penalize scores with higher depth
-          // this takes the nth root of the score where n is the number of moves
-          weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
-          value: moveData,
-          children: [],
-          move: move,
-          moveName: MOVE_NAMES_MAP[move],
-          parent: node,
-        });
+      if (!moveData.wasMoved) {
+        continue;
       }
+
+      treeSize++;
+
+      node.children.push({
+        // penalize scores with higher depth
+        // this takes the nth root of the score where n is the number of moves
+        weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
+        value: moveData,
+        children: [],
+        move: move,
+        moveName: MOVE_NAMES_MAP[move],
+        parent: node,
+      });
     }
 
     for (let childNode of node.children) {
