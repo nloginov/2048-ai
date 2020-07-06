@@ -168,12 +168,19 @@ class UI {
 
     buttons.style = `
      display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
-     position: fixed; top: 0.5rem; left: 0.5rem`;
+     position: fixed; top: 0.5rem; left: 0.5rem;
+     background: white; color: black;
+     padding: 0.5rem;
+     box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+     border-radius: 0.25rem;
+    `;
 
     runAStar.innerText = 'Run A.I. (A*)';
     runRNN.innerText = 'Run A.I. (RNN)';
 
     autoRetryLabel.innerText = 'Auto-Retry';
+    autoRetry.type = 'checkbox';
+
     autoRetry.addEventListener('click', (e) => {
       this.isAutoRetryEnabled = e.target.checked;
 
