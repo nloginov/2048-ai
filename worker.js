@@ -261,23 +261,25 @@ function createRnn() {
   return new RL.DQNAgent(env, spec);
 }
 
+const calculateReward = (move, originalGame) => {
+  let clonedGame = clone(originalGame);
+  let moveData = imitateMove(clonedGame, move);
+
+  if (moveData.wasMoved) {
+    return 0;
+  }
+
+  if (moveData.score > originalGame.score) {
+    return 1;
+  }
+
+  return -1;
+};
+
+// eslint-disable-next-line
 async function train(initialGame) {
   let game = initialGame;
   let iterations = 0;
-
-  const calculateReward = (move, clone) => {
-    let moveData = imitateMove(clone, move);
-
-    if (moveData.wasMoved) {
-      return 0;
-    }
-
-    if (moveData.score > game.score) {
-      return 1;
-    }
-
-    return -1;
-  };
 
   const update = async (clonedGame) => {
     let inputs = gameTo1DArray(clonedGame);
@@ -314,8 +316,13 @@ async function runRNN(game) {
   if (!rnn) {
     rnn = createRnn();
 
-    await train(game);
-    console.debug('Training Data');
+    // await train(game);
+    let data = localStorage.get('training');
+
+    if (data) {
+      run.fromJSON(data);
+    }
+
     console.debug(rnn.toJSON());
   }
 
@@ -323,8 +330,11 @@ async function runRNN(game) {
 
   // normalized to 0-1
   let moveIndex = await rnn.act(inputs);
-
   let move = ALL_MOVES[moveIndex];
+  let reward = calculateReward(move, game);
+
+  rnn.learn(reward);
+  localStorage.set('training', rnn.toJSON());
 
   self.postMessage({ type: 'move', move });
 }

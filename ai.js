@@ -172,7 +172,7 @@ class UI {
 
   runAI(algorithm) {
     this.algorithm = algorithm;
-    this.buttons.forEach((button) => (button.disabled = true));
+    // this.buttons.forEach((button) => (button.disabled = true));
 
     this.requestNextMove();
   }
