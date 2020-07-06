@@ -262,6 +262,20 @@ function createRnn() {
   return new RL.DQNAgent(env, spec);
 }
 
+function outcomesForEachMove(game) {
+  let result = [];
+
+  for (let move of ALL_MOVES) {
+    let clonedGame = clone(game);
+    let moveData = imitateMove(clonedGame, move);
+
+    result.push(moveData);
+  }
+
+  // biggest first
+  result.sort((a, b) => b.score - a.score);
+}
+
 const calculateReward = (move, originalGame) => {
   let clonedGame = clone(originalGame);
   let moveData = imitateMove(clonedGame, move);
@@ -278,14 +292,14 @@ const calculateReward = (move, originalGame) => {
     return -0.01;
   }
 
-  if (moveData.score > originalGame.score) {
-    console.debug(
-      'reward: ',
-      1 - originalGame.score / moveData.score,
-      originalGame.score,
-      moveData.score
-    );
+  let bestPossibleMove = outcomesForEachMove(originalGame)[0];
+  let bestPossibleScore = bestPossibleMove.score;
 
+  if (moveData.score >= bestPossibleScore) {
+    return 1 - originalGame.score / bestPossibleScore.score;
+  }
+
+  if (moveData.score > originalGame.score) {
     return 1 - originalGame.score / moveData.score;
   }
 
@@ -293,7 +307,7 @@ const calculateReward = (move, originalGame) => {
   // it's possible that we need to do something that doesn't
   // change our score before getting to something good
   // TODO: penalize more when thare are available moves of higher value
-  return -0.001;
+  return -0.01;
 };
 
 async function runRNN(game, trainingData) {
