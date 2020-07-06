@@ -95,7 +95,7 @@ class AIWorker {
         }
 
         if (data.trainingData) {
-          localStorage.setItem('training', data.trainingData);
+          localStorage.setItem('training', JSON.stringify(data.trainingData));
         }
 
         return container.ui.keyDown(data.move);
@@ -127,7 +127,7 @@ class AIWorker {
     let trainingData;
 
     if (algorithm === 'RNN') {
-      trainingData = localStorage.getItem('training');
+      trainingData = JSON.parse(localStorage.getItem('training'));
     }
 
     this.send({
