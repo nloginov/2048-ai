@@ -354,11 +354,11 @@ const calculateReward = (move, originalGame) => {
   let bestPossibleScore = bestPossibleMove.score || 10000000;
 
   if (moveData.score >= bestPossibleScore) {
-    return 1 - originalGame.score / bestPossibleScore.score;
+    return 1 - originalGame.score / moveData.score;
   }
 
   if (moveData.score > originalGame.score) {
-    return 1 - originalGame.score / moveData.score;
+    return (1 - originalGame.score / moveData.score) / 2;
   }
 
   // next score is equal to current
