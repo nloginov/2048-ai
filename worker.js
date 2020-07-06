@@ -41,7 +41,7 @@ const isEqual = (a, b) => {
 };
 
 const gameTo1DArray = (game) => {
-  return game.grid.cells.flat().map((cell) => (cell ? cell.value : cell));
+  return game.grid.cells.flat().map((cell) => (cell ? cell.value : 0));
 };
 
 // eslint-disable-next-line
