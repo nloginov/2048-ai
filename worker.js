@@ -120,13 +120,9 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 4) {
+    if (level >= 6) {
       return;
     }
-
-    // if (level >= 9 || level > maxLevel) {
-    //   return;
-    // }
 
     for (let move of ALL_MOVES) {
       let copyOfModel = clone(node.value);
@@ -142,7 +138,7 @@ function treeAI(model, maxLevel) {
         // penalize scores with higher depth
         // this takes the nth root of the score where n is the number of moves
         // weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
-        weightedScore: moveData.score / 1 / (level + 1),
+        weightedScore: moveData.score / 1 / (level * 2 + 1),
         value: moveData,
         children: [],
         move: move,
