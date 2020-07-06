@@ -266,6 +266,14 @@ const calculateReward = (move, originalGame) => {
   let clonedGame = clone(originalGame);
   let moveData = imitateMove(clonedGame, move);
 
+  if (clonedGame.over) {
+    if (clonedGame.won) {
+      return 1;
+    } else {
+      return -1;
+    }
+  }
+
   if (!moveData.wasMoved) {
     return -0.01;
   }
