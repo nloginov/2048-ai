@@ -70,6 +70,8 @@ const countEmptySpaces = (game) => {
  *
  */
 function treeAI(model, maxLevel) {
+  console.debug({ maxLevel });
+
   let bestNode;
   let treeSize = 0;
   let bestScore = 0;
@@ -118,9 +120,13 @@ function treeAI(model, maxLevel) {
   function expandTree(node, level) {
     updateBest(node);
 
-    if (level >= 9 || level > maxLevel) {
+    if (level >= 8) {
       return;
     }
+
+    // if (level >= 9 || level > maxLevel) {
+    //   return;
+    // }
 
     for (let move of ALL_MOVES) {
       let copyOfModel = clone(node.value);
