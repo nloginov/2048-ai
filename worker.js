@@ -357,10 +357,11 @@ async function loadDependencies() {
 
         let response = await fetch(depUrl);
         let script = await response.text();
-        // let blob = new Blob([script], { type: 'text/javascript' });
+        let blob = new Blob([script], { type: 'text/javascript' });
+        let blobLink = URL.createObjectURL(blob);
 
         // yolo
-        eval(script);
+        importScripts(blobLink);
       }
     })
   );
