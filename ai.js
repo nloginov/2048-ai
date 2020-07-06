@@ -83,6 +83,7 @@ class AIWorker {
 
     switch (data.type) {
       case 'ack':
+      case 'ready':
         console.debug(`Received: ${JSON.stringify(data)}`);
 
         return;

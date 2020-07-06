@@ -1,16 +1,14 @@
 /* global importScripts, RL */
 // importScripts(
-//   'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js'
 // );
-importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
 
-try {
-  importScripts(
-    'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/game-backup/dist/js/maps/app.js'
-  );
-} catch (e) {
-  console.error(e);
-}
+const dependencies = [
+  'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js',
+
+  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/game-backup/dist/js/maps/app.js',
+];
+
+// importScripts('https://rawgit.com/karpathy/reinforcejs/master/lib/rl.js');
 
 const MOVE = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 const ALL_MOVES = [MOVE.UP, MOVE.RIGHT, MOVE.DOWN, MOVE.LEFT];
@@ -349,12 +347,26 @@ function run({ game, maxLevel, algorithm }) {
   }
 }
 
+async function loadDependencies() {
+  await Promise.all(
+    dependencies.map(async (depUrl) => {
+      let response = await fetch(depUrl);
+      let script = await response.text();
+      let blob = new Blob([script], { type: 'text/javascript' });
+
+      importScripts(blob);
+    })
+  );
+
+  self.postMessage({ type: 'ack' });
+}
+
 self.onmessage = function (e) {
   let { data } = e;
 
   switch (data.type) {
     case 'ready':
-      return self.postMessage({ type: 'ack' });
+      return loadDependencies();
 
     case 'run':
       // it's possible to have ~ 3 moves of nothing happening
