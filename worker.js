@@ -285,7 +285,7 @@ async function train(initialGame) {
     let inputs = gameTo1DArray(clonedGame);
     let action = rnn.act(inputs);
 
-    let move = ALL_MOVES(action);
+    let move = ALL_MOVES[action];
     let reward = calculateReward(move, clonedGame);
 
     rnn.learn(reward);
