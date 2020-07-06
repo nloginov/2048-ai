@@ -270,8 +270,8 @@ const calculateReward = (move, originalGame) => {
   let clonedGame = clone(originalGame);
   let moveData = imitateMove(clonedGame, move);
 
-  if (moveData.wasMoved) {
-    return 0.01;
+  if (!moveData.wasMoved) {
+    return -0.01;
   }
 
   if (moveData.score > originalGame.score) {
@@ -286,7 +286,9 @@ const calculateReward = (move, originalGame) => {
   }
 
   // next score is equal to current
-  return -0.01;
+  // it's possible that we need to do something that doesn't
+  // change our score before getting to something good
+  return 0.001;
 };
 
 async function runRNN(game, trainingData) {
