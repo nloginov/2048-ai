@@ -310,20 +310,15 @@ async function train(initialGame) {
   });
 }
 
-async function runRNN(game) {
+async function runRNN(game, trainingData) {
   Object.freeze(game.grid);
 
   if (!rnn) {
     rnn = createRnn();
 
-    // await train(game);
-    let data = localStorage.get('training');
-
-    if (data) {
-      run.fromJSON(data);
+    if (trainingData) {
+      run.fromJSON(trainingData);
     }
-
-    console.debug(rnn.toJSON());
   }
 
   let inputs = gameTo1DArray(game);
@@ -334,17 +329,16 @@ async function runRNN(game) {
   let reward = calculateReward(move, game);
 
   rnn.learn(reward);
-  localStorage.set('training', rnn.toJSON());
 
-  self.postMessage({ type: 'move', move });
+  self.postMessage({ type: 'move', move, trainingData: rnn.toJSON() });
 }
 
-function run({ game, maxLevel, algorithm }) {
+function run({ game, maxLevel, algorithm, trainingData }) {
   switch (algorithm) {
     case 'A*':
       return runAStar(game, maxLevel);
     case 'RNN':
-      return runRNN(game);
+      return runRNN(game, trainingData);
     default:
       console.error(...arguments);
       throw new Error('Unrecognized Algorithm', algorithm);

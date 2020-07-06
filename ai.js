@@ -94,6 +94,10 @@ class AIWorker {
           return;
         }
 
+        if (data.trainingData) {
+          localStorage.setItem('training', data.trainingData);
+        }
+
         return container.ui.keyDown(data.move);
       default:
         console.error(data);
@@ -120,10 +124,17 @@ class AIWorker {
       this.lastNewDoctorAt = new Date();
     }
 
+    let trainingData;
+
+    if (algorithm === 'RNN') {
+      trainingData = localStorage.getItem('training');
+    }
+
     this.send({
       type: 'run',
       game,
       algorithm,
+      trainingData,
       maxLevel: Math.max(biggest - 3, 1),
     });
   }
