@@ -251,7 +251,7 @@ function createRnn() {
     experience_size: 5000, // size of experience replay memory
     learning_steps_per_iteration: 20,
     tderror_clamp: 1.0, // for robustness
-    num_hidden_units: 256, // number of neurons in hidden layer
+    num_hidden_units: 20, // number of neurons in hidden layer
   };
 
   let env = {
@@ -292,7 +292,8 @@ const calculateReward = (move, originalGame) => {
   // next score is equal to current
   // it's possible that we need to do something that doesn't
   // change our score before getting to something good
-  return 0.001;
+  // TODO: penalize more when thare are available moves of higher value
+  return -0.001;
 };
 
 async function runRNN(game, trainingData) {
