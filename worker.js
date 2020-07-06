@@ -135,7 +135,8 @@ function treeAI(model, maxLevel) {
       node.children.push({
         // penalize scores with higher depth
         // this takes the nth root of the score where n is the number of moves
-        weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
+        // weightedScore: moveData.score, //Math.pow(moveData.score, 1 / (level + 1)),
+        weightedScore: moveData.score / 1 / (level + 1),
         value: moveData,
         children: [],
         move: move,
