@@ -225,7 +225,7 @@ function runAStar(game, maxLevel) {
   console.debug('-------------- Calculate Move -----------------');
   let initialTime = new Date();
 
-  let move = treeAI(game, maxLevel);
+  let move = treeAI(game, Math.max(maxLevel, 4));
 
   console.debug(`Time: ${new Date() - initialTime}ms`);
 
