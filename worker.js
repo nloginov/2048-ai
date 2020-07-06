@@ -278,7 +278,7 @@ async function train(initialGame) {
     return -1;
   };
 
-  const update = async (resolve, clonedGame) => {
+  const update = async (clonedGame) => {
     let inputs = gameTo1DArray(clonedGame);
     let action = rnn.act(inputs);
 
@@ -293,14 +293,17 @@ async function train(initialGame) {
   return new Promise((resolve) => {
     while (iterations < maxTrainingIterations) {
       iterations++;
+      console.debug(`Iteration: ${iterations}`);
       let clonedGame = clone(game);
 
       if (clonedGame.over) {
         clonedGame = clone(initialGame);
       }
 
-      update(resolve, clonedGame);
+      update(clonedGame);
     }
+
+    resolve();
   });
 }
 
