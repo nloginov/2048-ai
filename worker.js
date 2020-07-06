@@ -273,7 +273,7 @@ function outcomesForEachMove(game) {
   }
 
   // biggest first
-  result.sort((a, b) => b.score - a.score);
+  return result.sort((a, b) => b.score - a.score);
 }
 
 const calculateReward = (move, originalGame) => {
@@ -292,8 +292,8 @@ const calculateReward = (move, originalGame) => {
     return -0.01;
   }
 
-  let bestPossibleMove = outcomesForEachMove(originalGame)[0];
-  let bestPossibleScore = bestPossibleMove.score;
+  let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
+  let bestPossibleScore = bestPossibleMove.score || 10000000;
 
   if (moveData.score >= bestPossibleScore) {
     return 1 - originalGame.score / bestPossibleScore.score;
