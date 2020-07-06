@@ -254,7 +254,7 @@ function createRnn() {
 
   let env = {
     getNumStates: () => 4,
-    getMaxNumActions: () => 5,
+    getMaxNumActions: () => 4,
   };
 
   return new RL.DQNAgent(env, spec);
