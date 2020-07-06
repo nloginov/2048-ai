@@ -163,7 +163,13 @@ function treeAI(model, maxLevel) {
     }
   }
 
-  expandTree(rootNode, 0);
+  let initialLevel = 0;
+
+  while (bestNode === undefined || initialLevel < -3) {
+    expandTree(rootNode, initialLevel);
+
+    initialLevel = initialLevel - 1;
+  }
 
   let bestMove = bestNode.move;
 
