@@ -233,7 +233,7 @@ function runAStar(game, maxLevel) {
 }
 
 let rnn;
-let maxTrainingIterations = 1000;
+let maxTrainingIterations = 10000;
 
 function createRnn() {
   // followed:
@@ -314,12 +314,14 @@ async function runRNN(game) {
     rnn = createRnn();
 
     await train(game);
+    console.debug('Training Data');
+    console.debug(rnn.toJSON());
   }
 
   let inputs = gameTo1DArray(game);
 
   // normalized to 0-1
-  let moveIndex = await self.model.agent.act(inputs);
+  let moveIndex = await rnn.act(inputs);
 
   let move = ALL_MOVES[moveIndex];
 
