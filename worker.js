@@ -3,8 +3,7 @@
 // );
 
 const dependencies = [
-  'https://rawgit.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js',
-
+  'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/rl.js',
   'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/game.js',
 ];
 
