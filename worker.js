@@ -62,6 +62,21 @@ const cellOnEdge = (cell) => {
   return x === 0 || y === 0 || x === 3 || y === 3;
 };
 
+const cellInCorner = (cell) => {
+  if (!cell || !cell.position) {
+    return false;
+  }
+
+  let { x, y } = cell.position;
+
+  return (
+    (x === 0 && y === 0) ||
+    (x === 0 && y === 3) ||
+    (x === 3 && y === 0) ||
+    (x === 3 && y === 3)
+  );
+};
+
 const edgeMultiplierFor = (game) => {
   // there are always at least 2 cells
   let [highest, secondHighest] = highestCells(game);
@@ -70,6 +85,10 @@ const edgeMultiplierFor = (game) => {
 
   if (cellOnEdge(highest)) {
     multiplier += 2;
+  }
+
+  if (cellInCorner(highest)) {
+    multiplier += 1;
   }
 
   if (cellOnEdge(secondHighest)) {
@@ -104,9 +123,7 @@ const countEmptySpaces = (game) => {
  *   maxLevel will only be reached in the event of ties in score
  *
  */
-function treeAI(model, maxLevel) {
-  console.debug({ maxLevel });
-
+function treeAI(model) {
   let bestNode;
   let treeSize = 0;
   let bestScore = 0;
