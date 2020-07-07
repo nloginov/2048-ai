@@ -154,7 +154,8 @@ const calculateReward = (move, originalGame) => {
   }
 
   if (!moveData.wasMoved) {
-    return -0.01;
+    // strongly discourage invalid moves
+    return -1;
   }
 
   let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
