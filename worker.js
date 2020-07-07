@@ -79,20 +79,45 @@ const cellInCorner = (cell) => {
 
 const edgeMultiplierFor = (game) => {
   // there are always at least 2 cells
-  let [highest, secondHighest] = highestCells(game);
+  let cells = highestCells(game);
+  let [highest, ...rest] = cells;
+
+  let sortedByDistance = rest.sort((a, b) => {
+    let bv = b ? b.value : 0;
+    let av = a ? a.value : 0;
+
+    // bigger numbers first
+    let vSort = bv - av;
+
+    if (vSort !== 0) {
+      return vSort;
+    }
+
+    let da = distance(highest, a);
+    let db = distance(highest, b);
+
+    // smaller numbers first
+    return da - db;
+  });
+
+  let [secondHighest, thirdHighest] = sortedByDistance;
 
   let multiplier = 1;
 
   if (cellOnEdge(highest)) {
-    multiplier += 2;
-  }
-
-  if (cellInCorner(highest)) {
     multiplier += 1;
   }
 
+  if (cellInCorner(highest)) {
+    multiplier += 4;
+  }
+
   if (cellOnEdge(secondHighest)) {
-    multiplier += 0.25;
+    multiplier += 1;
+  }
+
+  if (cellOnEdge(thirdHighest)) {
+    multiplier += 0.5;
   }
 
   return multiplier;
@@ -111,6 +136,20 @@ const countEmptySpaces = (game) => {
   });
 
   return empty;
+};
+
+const distance = (a, b) => {
+  if (!a || !b || !a.position || !b.position) {
+    return 1000000;
+  }
+
+  return Math.abs(
+    Math.sqrt(
+      Math.pow(a.position.x - b.position.x, 2),
+      Math.pow(a.position.y - b.position.y),
+      2
+    )
+  );
 };
 
 /**
@@ -192,7 +231,7 @@ function treeAI(model) {
         // this is a very important strategy
         let multiplier = edgeMultiplierFor(moveData.model);
 
-        let weightedScore = (scoreChange / 1 / (level * 2 + 1)) * multiplier;
+        let weightedScore = scoreChange / 1 / ((level + 1) * multiplier);
 
         node.children.push({
           // penalize scores with higher depth
@@ -213,8 +252,8 @@ function treeAI(model) {
 
     // to try to account for misfortune
     enumerateMoves();
-    enumerateMoves();
-    enumerateMoves();
+    // enumerateMoves();
+    // enumerateMoves();
 
     for (let childNode of node.children) {
       expandTree(childNode, level + 1);
