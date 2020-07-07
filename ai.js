@@ -136,9 +136,8 @@ class AIWorker {
 }
 
 class GameData {
-  constructor(game, totalTime) {
-    this.score = game.score;
-    this.won = game.won;
+  constructor(score, totalTime) {
+    this.score = score;
     this.totalTime = totalTime;
   }
 }
@@ -248,9 +247,9 @@ class UI {
     }
 
     if (this.isGameOver) {
-      let game = JSON.parse(localStorage.getItem('gameState'));
+      let score = parseInt(document.querySelector('.score-container'), 10);
 
-      this.gameHistory.push(new GameData(game, this.totalTime));
+      this.gameHistory.push(new GameData(score, this.totalTime));
 
       container.ai.startTime = undefined;
 
