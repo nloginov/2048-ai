@@ -369,7 +369,7 @@ function createRnn() {
     experience_size: 5000, // size of experience replay memory
     learning_steps_per_iteration: 20,
     tderror_clamp: 1.0, // for robustness
-    num_hidden_units: 20, // number of neurons in hidden layer
+    num_hidden_units: Math.pow(2, 13), // number of neurons in hidden layer
   };
 
   let env = {
