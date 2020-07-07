@@ -102,21 +102,25 @@ const edgeMultiplierFor = (game) => {
 
   let [secondHighest, thirdHighest] = sortedByDistance;
 
-  let multiplier = 1;
+  let multiplier = 0.25;
+  let edge1 = cellOnEdge(highest);
+  let corner1 = cellInCorner(highest);
+  let edge2 = cellOnEdge(secondHighest);
+  let edge3 = cellOnEdge(thirdHighest);
 
-  if (cellOnEdge(highest)) {
+  if (edge1) {
     multiplier += 1;
   }
 
-  if (cellInCorner(highest)) {
+  if (corner1) {
     multiplier += 4;
   }
 
-  if (cellOnEdge(secondHighest)) {
+  if (edge2) {
     multiplier += 1;
   }
 
-  if (cellOnEdge(thirdHighest)) {
+  if (edge3) {
     multiplier += 0.5;
   }
 
