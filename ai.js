@@ -106,23 +106,18 @@ class AIWorker {
   }
 
   requestNextMove(game, algorithm) {
-    if (!this.hasStarted) {
-      this.hasStarted = true;
+    if (!this.startTime) {
       this.startTime = new Date();
-      this.lastNewDoctorAt = new Date();
     }
 
     let biggest = biggestTile(game).num;
 
-    console.warn(`Biggest Tile: ${biggest} | ${DOCTOR_NUMBER_MAP[biggest]}`);
+    let totalTime = new Date() - this.startTime;
 
-    if (biggest !== this.lastBiggest) {
-      console.info(`New Doctor took: ${new Date() - this.lastNewDoctorAt}ms`);
-      console.info(`Total Time: ${new Date() - this.startTime}ms`);
-
-      this.lastBiggest = biggest;
-      this.lastNewDoctorAt = new Date();
-    }
+    container.ui.updateStatus({
+      topDoctor: DOCTOR_NUMBER_MAP[biggest],
+      totalTime,
+    });
 
     let trainingData;
 
@@ -140,6 +135,14 @@ class AIWorker {
   }
 }
 
+class GameData {
+  constructor(game, totalTime) {
+    this.score = game.score;
+    this.won = game.won;
+    this.totalTime = totalTime;
+  }
+}
+
 class UI {
   static async create() {
     let ui = new UI();
@@ -150,6 +153,8 @@ class UI {
     return ui;
   }
 
+  gameHistory = [];
+
   constructor() {
     // blegh, can't wait for decorators to land
     this.setup = this.setup.bind(this);
@@ -157,14 +162,18 @@ class UI {
     this.keyDown = this.keyDown.bind(this);
     this.requestNextMove = this.requestNextMove.bind(this);
     this.autoRetry = this.autoRetry.bind(this);
+    this.updateStatus = this.updateStatus.bind(this);
+    this.updateStats = this.updateStats.bind(this);
   }
 
   setup() {
+    let uiContainer = document.createElement('div');
     let buttons = document.createElement('div');
-    let runAStar = document.createElement('button');
     let runRNN = document.createElement('button');
     let autoRetry = document.createElement('input');
     let autoRetryLabel = document.createElement('label');
+    let gameContainer = document.querySelector('.container');
+    let stats = document.createElement('p');
 
     buttons.style = `
      display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
@@ -174,8 +183,8 @@ class UI {
      box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
      border-radius: 0.25rem;
     `;
+    gameContainer.style = 'margin-top: 8rem';
 
-    runAStar.innerText = 'Run A.I. (A*)';
     runRNN.innerText = 'Run A.I. (RNN)';
 
     autoRetryLabel.innerText = 'Auto-Retry';
@@ -187,18 +196,46 @@ class UI {
       this.autoRetry();
     });
 
-    runAStar.addEventListener('click', () => this.runAI('A*'));
     runRNN.addEventListener('click', () => this.runAI('RNN'));
 
     autoRetryLabel.prepend(autoRetry);
 
-    buttons.appendChild(runAStar);
     buttons.appendChild(runRNN);
     buttons.appendChild(autoRetryLabel);
 
-    document.body.appendChild(buttons);
+    uiContainer.appendChild(buttons);
+    uiContainer.appendChild(stats);
+    document.body.appendChild(uiContainer);
 
-    this.buttons = [runAStar, runRNN];
+    this.buttons = [runRNN];
+    this.stats = stats;
+  }
+
+  updateStats() {
+    let scores = this.gameHistory.map((h) => h.score);
+    let times = this.gameHistory.map((h) => h.totalTime);
+    let bestScore = Math.max(scores);
+    let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
+    let averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+    this.stats.innerHTML = `
+      This Session,<br>
+      Total Games: ${scores.length}<br>
+      Average Score: ${averageScore}<br>
+      Best Score ${bestScore}<br>
+      Average Game Length: ${averageTime} <br>
+      <hr>
+      <br>
+      This Game,<br>
+      Current Top Doctor: ${this.topDoctor}<br>
+    `;
+  }
+
+  updateStatus({ topDoctor, totalTime }) {
+    this.topDoctor = topDoctor;
+    this.totalTime = totalTime;
+
+    this.updateStats();
   }
 
   get isGameOver() {
@@ -211,6 +248,12 @@ class UI {
     }
 
     if (this.isGameOver) {
+      let game = JSON.parse(localStorage.getItem('gameState'));
+
+      this.gameHistory.push(new GameData(game, this.totalTime));
+
+      container.ai.startTime = undefined;
+
       document.querySelector('.retry-button').click();
 
       setTimeout(() => this.requestNextMove(), 1000);
