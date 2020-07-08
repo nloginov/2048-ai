@@ -110,11 +110,11 @@ function createRnn() {
   let spec = {
     update: 'qlearn', // qlearn | sarsa algorithm
     gamma: 0.9, // discount factor, [0, 1)
-    epsilon: 0.001, // initial epsilon for epsilon-greedy policy, [0, 1)
-    alpha: 0.001, // value function learning rate
+    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
+    alpha: 0.005, // value function learning rate
     experience_add_every: 5, // number of time steps before we add another experience to replay memory
-    experience_size: 5000, // size of experience replay memory
-    learning_steps_per_iteration: 20,
+    experience_size: 10000, // size of experience replay memory
+    learning_steps_per_iteration: 5,
     tderror_clamp: 1.0, // for robustness
     num_hidden_units: Math.pow(2, 13), // number of neurons in hidden layer
   };
