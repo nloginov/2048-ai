@@ -216,21 +216,17 @@ class UI {
   updateStats() {
     let scores = this.gameHistory.map((h) => h.score);
     let times = this.gameHistory.map((h) => h.totalTime);
-    let bestScore = Math.max(scores);
+    let bestScore = Math.max(...scores);
     let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
     let averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    let averageGameLength = Math.round((averageTime / 1000 / 60) * 100) / 100;
 
     this.stats.innerHTML = `
       This Session,<br>
       Total Games: ${scores.length}<br>
-      Average Score: ${averageScore}<br>
-      Best Score ${bestScore}<br>
-      Average Game Length: ${
-        Math.round((averageTime / 1000 / 60) * 100) / 100
-      } minutes <br>
+      Average Score: ${averageScore} | Best Score ${bestScore}<br>
+      Average Game Length: ${averageGameLength} minutes<br>
       <hr>
-      <br>
-      This Game,<br>
       Current Top Doctor: ${this.topDoctor}<br>
     `;
   }
