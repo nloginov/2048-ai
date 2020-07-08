@@ -181,6 +181,7 @@ class UI {
      padding: 0.5rem;
      box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
      border-radius: 0.25rem;
+     font-size: 0.75rem;
     `;
     buttons.style = `
      display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
@@ -224,8 +225,8 @@ class UI {
     this.stats.innerHTML = `
       This Session,<br>
       Total Games: ${scores.length}<br>
-      Average Score: ${averageScore} | Best Score ${bestScore}<br>
-      Average Game Length: ${averageGameLength} minutes<br>
+      Average Score: ${averageScore} | Best Score: ${bestScore || 'Pending'}<br>
+      Average Game Length: ${averageGameLength || 'Pending'} minutes<br>
       <hr>
       Current Top Doctor: ${this.topDoctor}<br>
     `;
