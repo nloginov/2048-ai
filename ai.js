@@ -1,3 +1,5 @@
+/* global fetchAndInsertScript, Vue */
+
 // NOTE: decorators do not exist in browsers, so we can't
 //       use any sort of fancy auto-"bind" decoration :(
 // poor man's Dependency Injection
@@ -134,15 +136,7 @@ class AIWorker {
       game,
       algorithm,
       trainingData,
-      maxLevel: Math.max(biggest - 3, 1),
     });
-  }
-}
-
-class GameData {
-  constructor(score, totalTime) {
-    this.score = score;
-    this.totalTime = totalTime;
   }
 }
 
@@ -170,52 +164,63 @@ class UI {
   }
 
   setup() {
-    let uiContainer = document.createElement('div');
-    let buttons = document.createElement('div');
-    let runRNN = document.createElement('button');
-    let autoRetry = document.createElement('input');
-    let autoRetryLabel = document.createElement('label');
-    let gameContainer = document.querySelector('.container');
-    let stats = document.createElement('p');
+    this.vueVm = new Vue({
+      template: `
+        <style>
+          .ai-container {
+            display: grid; grid-gap: 0.5rem;
+            position: fixed; top: 0.5rem; left: 0.5rem;
+            background: white; color: black;
+            padding: 0.5rem;
+            box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+          }
+          .ai-buttons {
+            display: grid;
+            grid-gap: 0.5rem;
+            grid-auto-flow: column;
+          }
 
-    uiContainer.style = `
-     display: grid; grid-gap: 0.5rem;
-     position: fixed; top: 0.5rem; left: 0.5rem;
-     background: white; color: black;
-     padding: 0.5rem;
-     box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
-     border-radius: 0.25rem;
-     font-size: 0.75rem;
-    `;
-    buttons.style = `
-     display: grid; grid-gap: 0.5rem; grid-auto-flow: column;
-    `;
-    gameContainer.style = 'margin-top: 8rem';
+          .container {
+            margin-top: 8rem;
+          }
+        </style>
 
-    runRNN.innerText = 'Run A.I. (RNN)';
+        <div class="ai-container">
+          <div class="ai-buttons">
+            <button type='button' @click="runAI">
+              Run A.I. (RNN)
+            </button>
 
-    autoRetryLabel.innerText = 'Auto-Retry';
-    autoRetry.type = 'checkbox';
+            <label>
+              Auto-Retry
+              <input type='checkbox' @click="toggleAutoRetry">
+            </label>
+          </div>
 
-    autoRetry.addEventListener('click', (e) => {
-      this.isAutoRetryEnabled = e.target.checked;
+          <p class='ai-stats'>
+            This Session,<br>
+            <dl>
+              <dt>Total Games</dt> <dd>{{ stats.numGames }}</dd>
+              <dt>Average Score</dt> <dd>{{ stats.averageScore }}</dd>
+              <dt>Best Score</dt> <dd>{{ stats.bestScore }}</dd>
+              <dt>Average Game Length</dt> <dd>{{ stats.averageGameLength }} minutes</dd>
+              <dt>Current Top Doctor<dt> <dd>{{ stats.topDoctor }}</dd>
+            </dl>
+            <br>
+          </p>
+        </div>
+      `,
+      methods: {
+        toggleAutoRetry: (e) => {
+          this.isAutoRetryEnabled = e.target.checked;
 
-      this.autoRetry();
+          this.autoRetry();
+        },
+        runAI: () => this.runAI('RNN'),
+      },
     });
-
-    runRNN.addEventListener('click', () => this.runAI('RNN'));
-
-    autoRetryLabel.prepend(autoRetry);
-
-    buttons.appendChild(runRNN);
-    buttons.appendChild(autoRetryLabel);
-
-    uiContainer.appendChild(buttons);
-    uiContainer.appendChild(stats);
-    document.body.appendChild(uiContainer);
-
-    this.buttons = [runRNN];
-    this.stats = stats;
   }
 
   updateStats() {
@@ -226,14 +231,13 @@ class UI {
     let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
     let averageGameLength = round(averageTime / 1000 / 60);
 
-    this.stats.innerHTML = `
-      This Session,<br>
-      Total Games: ${scores.length}<br>
-      Average Score: ${averageScore} | Best Score: ${bestScore || 'Pending'}<br>
-      Average Game Length: ${averageGameLength || 'Pending'} minutes<br>
-      <br>
-      Current Top Doctor: ${this.topDoctor}<br>
-    `;
+    this.vueVm.stats = {
+      numGames: scores.length,
+      averageScore: averageScore || 0,
+      bestScore: bestScore || 0,
+      averageGameLength: averageGameLength || 0,
+      topDoctor: this.topDoctor,
+    };
   }
 
   updateStatus({ topDoctor, totalTime }) {
@@ -258,7 +262,7 @@ class UI {
         10
       );
 
-      this.gameHistory.push(new GameData(score, this.totalTime));
+      this.gameHistory.push({ score, totalTime: this.totalTime });
 
       container.ai.startTime = undefined;
 
@@ -273,7 +277,6 @@ class UI {
 
   runAI(algorithm) {
     this.algorithm = algorithm;
-    // this.buttons.forEach((button) => (button.disabled = true));
 
     this.requestNextMove();
   }
@@ -317,7 +320,12 @@ class UI {
   }
 }
 
+let vueDist =
+  'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.min.js';
+
 async function boot() {
+  await fetchAndInsertScript(vueDist);
+
   await AIWorker.create();
   await UI.create();
 
