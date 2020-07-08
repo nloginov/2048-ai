@@ -1,4 +1,4 @@
-/* global fetchAndInsertScript, Vue */
+/* global Vue */
 
 // NOTE: decorators do not exist in browsers, so we can't
 //       use any sort of fancy auto-"bind" decoration :(
@@ -330,6 +330,19 @@ async function boot() {
   await UI.create();
 
   container.ai.send({ type: 'ready' });
+}
+
+async function fetchAndInsertScript(src) {
+  // fetching the URL instead of directly loading in a script
+  // tag allows us to get around CORS issues
+  let response = await fetch(src);
+  let script = await response.text();
+
+  let element = document.createElement('script');
+
+  element.innerHTML = script;
+
+  document.body.appendChild(element);
 }
 
 boot();
