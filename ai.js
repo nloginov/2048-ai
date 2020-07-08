@@ -43,7 +43,7 @@ function biggestTile(game) {
 }
 
 function round(num) {
-  Math.round(num * 100) / 100;
+  return Math.round(num * 100) / 100;
 }
 
 class AIWorker {
