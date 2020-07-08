@@ -42,6 +42,10 @@ function biggestTile(game) {
   return { value, num: VALUE_MAP[value] };
 }
 
+function round(num) {
+  Math.round(num * 100) / 100;
+}
+
 class AIWorker {
   static async create() {
     let ai = new AIWorker();
@@ -219,15 +223,15 @@ class UI {
     let times = this.gameHistory.map((h) => h.totalTime);
     let bestScore = Math.max(...scores);
     let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
-    let averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-    let averageGameLength = Math.round((averageTime / 1000 / 60) * 100) / 100;
+    let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    let averageGameLength = round(averageTime / 1000 / 60);
 
     this.stats.innerHTML = `
       This Session,<br>
       Total Games: ${scores.length}<br>
       Average Score: ${averageScore} | Best Score: ${bestScore || 'Pending'}<br>
       Average Game Length: ${averageGameLength || 'Pending'} minutes<br>
-      <hr>
+      <br>
       Current Top Doctor: ${this.topDoctor}<br>
     `;
   }

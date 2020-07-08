@@ -216,7 +216,7 @@ async function runRNN(game, trainingData) {
 
   let inputs = gameTo1DArray(game);
 
-  // normalized to 0-1
+  // normalized to 0-getMaxNumAction() - 1
   let moveIndex = await rnn.act(inputs);
   let move = ALL_MOVES[moveIndex];
   let reward = calculateReward(move, game);
