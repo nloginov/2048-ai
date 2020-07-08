@@ -159,7 +159,7 @@ const calculateReward = (move, originalGame) => {
   }
 
   let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
-  let bestPossibleScore = bestPossibleMove.score || 10000000;
+  let bestPossibleScore = bestPossibleMove.score;
 
   if (moveData.score >= bestPossibleScore) {
     return 1 - originalGame.score / moveData.score;
