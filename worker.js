@@ -189,12 +189,20 @@ const calculateReward = (move, originalGame) => {
   let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
   let bestPossibleScore = bestPossibleMove.score;
 
-  if (moveData.score >= bestPossibleScore) {
-    return 1;
-  }
+  // if (moveData.score >= bestPossibleScore) {
+  //   return 1;
+  // }
 
   if (moveData.score > originalGame.score) {
-    return 1 - originalGame.score / moveData.score;
+    // return 1 - originalGame.score / moveData.score;
+
+    // Provide a bigger reward the higher the merge value is
+
+    let additionalPoints = (moveData.score = originalGame.score);
+
+    let fractionalScore = additionalPoints / Math.pow(2, 13); // highest possible single merge score;
+
+    return fractionalScore > 1 ? 1 : fractionalScore;
   }
 
   // next score is equal to current
