@@ -44,6 +44,14 @@ const gameTo1DArray = (game) => {
   return game.grid.cells.flat().map((cell) => (cell ? cell.value : 0));
 };
 
+const highestCells = (game) => {
+  let cellList = game.grid.cells.flat();
+
+  let sorted = cellList.sort((a, b) => (b ? b.value : 0) - (a ? a.value : 0));
+
+  return sorted;
+};
+
 /////////////////////////////////////////////////////////////////////////
 // Game Helper Code
 /////////////////////////////////////////////////////////////////////////
@@ -194,15 +202,28 @@ const calculateReward = (move, originalGame) => {
   // }
 
   if (moveData.score > originalGame.score) {
-    // return 1 - originalGame.score / moveData.score;
+    let [first, second] = highestCells(originalGame);
+
+    if (first.value === second.value) {
+      let [newFirst, newSecond] = highestCells(moveData.model);
+
+      if (newFirst.value > newSecond.value) {
+        // NOTE: it's imposible for these to be the same.
+        return 1; // they merge
+      }
+
+      // no negative reward, because they might not be next to eachother
+    }
+
+    return 1 - originalGame.score / moveData.score;
 
     // Provide a bigger reward the higher the merge value is
 
-    let additionalPoints = (moveData.score = originalGame.score);
+    // let additionalPoints = (moveData.score = originalGame.score);
 
-    let fractionalScore = additionalPoints / Math.pow(2, 13); // highest possible single merge score;
+    // let fractionalScore = additionalPoints / Math.pow(2, 13); // highest possible single merge score;
 
-    return fractionalScore > 1 ? 1 : fractionalScore;
+    // return fractionalScore > 1 ? 1 : fractionalScore;
   }
 
   // next score is equal to current
