@@ -223,7 +223,7 @@ async function runRNN(game, trainingData) {
 
   rnn.learn(reward);
 
-  console.debug({ reward, move, moveName: MOVE_NAMES_MAP[move] });
+  console.debug({ reward, moveIndex, move, moveName: MOVE_NAMES_MAP[move] });
   self.postMessage({ type: 'move', move, trainingData: rnn.toJSON() });
 }
 
