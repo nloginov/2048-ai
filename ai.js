@@ -171,6 +171,7 @@ class UI {
     document.body.prepend(mountPoint);
 
     this.vueVm = new Vue({
+      el: mountPoint,
       template: `
         <style>
           .ai-container {
@@ -226,7 +227,7 @@ class UI {
         },
         runAI: () => this.runAI('RNN'),
       },
-    }).$mount(mountPoint);
+    });
   }
 
   updateStats() {
