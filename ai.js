@@ -201,7 +201,7 @@ class UI {
       },
     });
     let mount = createElement('div', {
-      class: 'ai-container grid',
+      class: 'ai-container grid grid-col',
       children: [
         createElement('style', {
           template: `
@@ -212,7 +212,7 @@ class UI {
               grid-auto-flow: column;
             }
             .ai-container {
-              position: fixed; top: 0.5rem; left: 0.5rem;
+              position: fixed; top: 0.5rem; left: 0.5rem; right: 0.5rem;
               background: white; color: black;
               padding: 0.5rem;
               box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
@@ -251,7 +251,7 @@ class UI {
           `,
         }),
         createElement('div', {
-          class: 'grid grid-col',
+          class: 'grid',
           children: [
             createElement('div', {
               class: 'ai-buttons grid',
