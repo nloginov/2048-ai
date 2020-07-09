@@ -331,7 +331,8 @@ let vueDist = 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js';
 async function boot() {
   await fetchAndInsertScript(vueDist, { type: 'module' });
 
-  await Promise.all([AIWorker.create(), UI.create()]);
+  await AIWorker.create();
+  await UI.create();
 
   container.ai.send({ type: 'ready' });
 }
