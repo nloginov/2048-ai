@@ -291,8 +291,14 @@ class UI {
     this.chart = new Chartist.Line(
       chart,
       {
-        labels: [],
-        series: [],
+        series: [
+          [
+            /* scores */
+          ],
+          [
+            /* averages */
+          ],
+        ],
       },
       {
         plugins: [
