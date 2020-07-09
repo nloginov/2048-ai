@@ -314,8 +314,6 @@ class UI {
     let times = this.gameHistory.map((h) => h.totalTime);
     let bestScore = Math.max(...scores);
     let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
-    let averageScore = this.gameHistory[this.gameHistory.length - 1]
-      .averageScore;
     let averageGameLength = round(averageTime / 1000 / 60);
 
     this.chart.update({
@@ -327,7 +325,7 @@ class UI {
 
     this.stats.update({
       numGames: scores.length,
-      averageScore: averageScore || 0,
+      averageScore: averageScores[averageScores.length - 1] || 0,
       bestScore: bestScore || 0,
       averageGameLength: averageGameLength || 0,
       topDoctor: this.topDoctor,
