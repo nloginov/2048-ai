@@ -172,6 +172,7 @@ class UI {
 
     this.vueVm = new Vue({
       el: mountPoint,
+      name: 'ai-ui',
       template: `
         <style>
           .ai-container {
