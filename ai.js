@@ -279,7 +279,7 @@ class UI {
     });
 
     this.chart = new Chartist.Line(
-      '.ai-score-over-time',
+      chart,
       {
         labels: [],
         series: [],
