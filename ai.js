@@ -130,93 +130,37 @@ class AIWorker {
   };
 }
 
-class UIComponent {
-  constructor({ onRun, enableAutoRetry }) {
-    this.args = { onRun, enableAutoRetry };
+function createElement(
+  tagName,
+  { events, children, template, ...attributes } = {}
+) {
+  let element = document.createElement(tagName);
 
-    this.data = {};
+  Object.assign(element, attributes || {});
 
-    this.mount();
-    this.update();
+  Object.entries(events || {}).forEach(([eventName, handler]) => {
+    element.addEventListener(eventName, handler);
+  });
+
+  (children || []).forEach((child) => {
+    element.appendChild(child);
+  });
+
+  element.update = (data = {}) => {
+    if (template) {
+      if (typeof template === 'function') {
+        element.innerHTML = template(data);
+      } else {
+        element.innerHTML = template;
+      }
+    }
+  };
+
+  if (template) {
+    element.update();
   }
 
-  mount = () => {
-    let mountPoint = document.createComment('div');
-
-    mountPoint.id = 'ai-mount-point';
-
-    document.body.prepend(mountPoint);
-
-    this.render();
-
-    document
-      .querySelector('.ai-container .ai-buttons button')
-      .addEventListener('click', this.args.onRun);
-
-    document
-      .querySelector('.ai-container .ai-buttons input')
-      .addEventListener('click', this.args.enableAutoRetry);
-  };
-
-  update = (data) => {
-    this.data = data || {};
-
-    this.mountPoint.innerHTML = this.render();
-  };
-
-  render = () => {
-    return `
-      <style>
-        .ai-container {
-          display: grid; grid-gap: 0.5rem;
-          position: fixed; top: 0.5rem; left: 0.5rem;
-          background: white; color: black;
-          padding: 0.5rem;
-          box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
-          border-radius: 0.25rem;
-          font-size: 0.75rem;
-        }
-        .ai-buttons {
-          display: grid;
-          grid-gap: 0.5rem;
-          grid-auto-flow: column;
-        }
-
-        .container {
-          margin-top: 8rem;
-        }
-
-        .ai-container dt {
-          font-weight: bold;
-        }
-      </style>
-
-      <div class="ai-container">
-        <div class="ai-buttons">
-          <button type='button'>
-            Run A.I. (RNN)
-          </button>
-
-          <label>
-            Auto-Retry
-            <input type='checkbox'>
-          </label>
-        </div>
-
-        <p class='ai-stats'>
-          This Session,<br>
-          <dl>
-            <dt>Total Games</dt> <dd>${this.data.numGames}</dd>
-            <dt>Average Score</dt> <dd>${this.data.averageScore}</dd>
-            <dt>Best Score</dt> <dd>${this.data.bestScore}</dd>
-            <dt>Average Game Length</dt> <dd>${this.data.averageGameLength} minutes</dd>
-            <dt>Current Top Doctor<dt> <dd>${this.data.topDoctor}</dd>
-          </dl>
-          <br>
-        </p>
-      </div>
-    `;
-  };
+  return element;
 }
 
 class UI {
@@ -232,14 +176,87 @@ class UI {
   gameHistory = [];
 
   setup = () => {
-    this.component = new UIComponent({
-      onRun: () => this.runAI('RNN'),
-      toggleAutoRetry: (e) => {
-        this.isAutoRetryEnabled = e.target.checked;
-
-        this.autoRetry();
+    let stats = createElement('p', {
+      class: 'ai-stats',
+      template: (data) => {
+        return `
+          This Session,<br>
+          <dl>
+            <dt>Total Games</dt> <dd>${data.numGames}</dd>
+            <dt>Average Score</dt> <dd>${data.averageScore}</dd>
+            <dt>Best Score</dt> <dd>${data.bestScore}</dd>
+            <dt>Average Game Length</dt> <dd>${data.averageGameLength} minutes</dd>
+            <dt>Current Top Doctor<dt> <dd>${data.topDoctor}</dd>
+          </dl>
+        `;
       },
     });
+    let mount = createElement('div', {
+      class: 'ai-container',
+      children: [
+        createElement('style', {
+          template: `
+            <style>
+              .ai-container {
+                display: grid; grid-gap: 0.5rem;
+                position: fixed; top: 0.5rem; left: 0.5rem;
+                background: white; color: black;
+                padding: 0.5rem;
+                box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+              }
+              .ai-buttons {
+                display: grid;
+                grid-gap: 0.5rem;
+                grid-auto-flow: column;
+              }
+
+              .container {
+                margin-top: 8rem;
+              }
+
+              .ai-container dt {
+                font-weight: bold;
+              }
+            </style>
+          `,
+        }),
+        createElement('div', {
+          class: 'ai-buttons',
+          children: [
+            createElement('button', {
+              type: 'button',
+              template: 'Run A.I. (RNN)',
+              events: {
+                click() {
+                  this.runAI('RNN');
+                },
+              },
+            }),
+            createElement('label', {
+              children: [
+                createElement('span', { template: 'Auto-Retry' }),
+                createElement('input', {
+                  type: 'checkbox',
+                  events: {
+                    click(e) {
+                      this.isAutoRetryEnabled = e.target.checked;
+
+                      this.autoRetry();
+                    },
+                  },
+                }),
+              ],
+            }),
+          ],
+        }),
+        stats,
+      ],
+    });
+
+    document.body.appendChild(mount);
+    this.stats = stats;
   };
 
   updateStats = () => {
@@ -250,7 +267,7 @@ class UI {
     let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
     let averageGameLength = round(averageTime / 1000 / 60);
 
-    this.component.update({
+    this.stats.update({
       numGames: scores.length,
       averageScore: averageScore || 0,
       bestScore: bestScore || 0,
