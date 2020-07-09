@@ -228,6 +228,13 @@ class UI {
               display: grid;
               grid-template-columns: repeat(2, 1fr);
             }
+
+            .ai-container label {
+              display: grid;
+              grid-auto-flow: column;
+              justify-content: start;
+              align-items: center;
+            }
           `,
         }),
         createElement('div', {
@@ -244,7 +251,6 @@ class UI {
             }),
             createElement('label', {
               children: [
-                createElement('span', { template: 'Auto-Retry' }),
                 createElement('input', {
                   type: 'checkbox',
                   events: {
@@ -255,6 +261,7 @@ class UI {
                     },
                   },
                 }),
+                createElement('span', { template: 'Auto-Retry' }),
               ],
             }),
           ],

@@ -52,6 +52,16 @@ const highestCells = (game) => {
   return sorted;
 };
 
+const groupByValue = (game) => {
+  let values = gameTo1DArray(game);
+
+  return values.reduce((group, value) => {
+    group[value] = (group[value] || 0) + 1;
+
+    return group;
+  }, {});
+};
+
 /////////////////////////////////////////////////////////////////////////
 // Game Helper Code
 /////////////////////////////////////////////////////////////////////////
@@ -194,27 +204,28 @@ const calculateReward = (move, originalGame) => {
     return -1;
   }
 
-  let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
-  let bestPossibleScore = bestPossibleMove.score;
+  let grouped = groupByValue(originalGame);
+  let newGrouped = groupByValue(moveData.model);
+
+  let highest = Math.max(...Object.keys(grouped));
+  let newHighest = Math.max(...Object.keys(newGrouped));
+
+  if (newHighest > highest) {
+    return 1;
+  }
+
+  if (newGrouped[highest] > grouped[highest]) {
+    return 1;
+  }
+
+  // let bestPossibleMove = outcomesForEachMove(originalGame)[0] || {};
+  // let bestPossibleScore = bestPossibleMove.score;
 
   // if (moveData.score >= bestPossibleScore) {
   //   return 1;
   // }
 
   if (moveData.score > originalGame.score) {
-    let [first, second] = highestCells(originalGame);
-
-    if (first.value === second.value) {
-      let [newFirst, newSecond] = highestCells(moveData.model);
-
-      if (newFirst.value > newSecond.value) {
-        // NOTE: it's imposible for these to be the same.
-        return 1; // they merge
-      }
-
-      // no negative reward, because they might not be next to eachother
-    }
-
     return 1 - originalGame.score / moveData.score;
 
     // Provide a bigger reward the higher the merge value is
@@ -229,7 +240,7 @@ const calculateReward = (move, originalGame) => {
   // next score is equal to current
   // it's possible that we need to do something that doesn't
   // change our score before getting to something good
-  return 0 - originalGame.score / bestPossibleScore;
+  return 0; // - originalGame.score / bestPossibleScore;
 };
 
 async function runRNN(game, trainingData) {
