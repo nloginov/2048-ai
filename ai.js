@@ -320,8 +320,7 @@ class UI {
   }
 }
 
-let vueDist =
-  'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.min.js';
+let vueDist = 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js';
 
 async function boot() {
   await fetchAndInsertScript(vueDist, { type: 'module' });
