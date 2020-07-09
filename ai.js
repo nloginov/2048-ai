@@ -164,6 +164,12 @@ class UI {
   }
 
   setup() {
+    let mountPoint = document.createComment('div');
+
+    mountPoint.id = 'ai-mount-point';
+
+    document.body.prepend(mountPoint);
+
     this.vueVm = new Vue({
       template: `
         <style>
@@ -220,7 +226,7 @@ class UI {
         },
         runAI: () => this.runAI('RNN'),
       },
-    });
+    }).$mount(mountPoint);
   }
 
   updateStats() {
@@ -325,8 +331,7 @@ let vueDist = 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js';
 async function boot() {
   await fetchAndInsertScript(vueDist, { type: 'module' });
 
-  await AIWorker.create();
-  await UI.create();
+  await Promise.all([AIWorker.create(), UI.create()]);
 
   container.ai.send({ type: 'ready' });
 }
