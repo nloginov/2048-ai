@@ -188,7 +188,6 @@ class UI {
       class: 'ai-stats',
       template: (data) => {
         return `
-          This Session,<br>
           <dl>
             <dt>Total Games</dt> <dd>${data.numGames}</dd>
             <dt>Average Score</dt> <dd>${data.averageScore}</dd>
@@ -224,12 +223,17 @@ class UI {
             }
 
             .ai-container dt {
-              font-weight: bold;
+              font-weight: 500;
             }
 
             .ai-container dl {
+              margin: 0;
               display: grid;
               grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ai-container dd {
+              margin-left: 25rem;
             }
 
             .ai-container label {
