@@ -233,7 +233,7 @@ class UI {
             }
 
             .ai-container dd {
-              margin-left: 25rem;
+              margin-left: 0.25rem;
             }
 
             .ai-container label {
