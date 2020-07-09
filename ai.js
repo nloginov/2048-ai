@@ -190,8 +190,8 @@ class UI {
       class: 'ai-stats',
       template: (data) => {
         return `
+          In the last 60 games,<br>
           <dl>
-            <dt>Total Games</dt> <dd>${data.numGames}</dd>
             <dt>Average Score</dt> <dd>${data.averageScore}</dd>
             <dt>Best Score</dt> <dd>${data.bestScore}</dd>
             <dt>Average Game Length</dt> <dd>${data.averageGameLength} minutes</dd>
