@@ -1,5 +1,3 @@
-/* global Vue */
-
 // NOTE: decorators do not exist in browsers, so we can't
 //       use any sort of fancy auto-"bind" decoration :(
 // poor man's Dependency Injection
@@ -58,15 +56,7 @@ class AIWorker {
     return ai;
   }
 
-  constructor() {
-    // blegh, can't wait for decorators to land
-    this.setup = this.setup.bind(this);
-    this.send = this.send.bind(this);
-    this.onMessage = this.onMessage.bind(this);
-    this.requestNextMove = this.requestNextMove.bind(this);
-  }
-
-  async setup() {
+  setup = async () => {
     // fetching the URL instead of directly loading in a script
     // tag allows us to get around CORS issues
     let workerUrl =
@@ -78,13 +68,13 @@ class AIWorker {
 
     this.worker = new Worker(URL.createObjectURL(blob));
     this.worker.onmessage = this.onMessage;
-  }
+  };
 
-  send(data) {
+  send = (data) => {
     this.worker.postMessage(data);
-  }
+  };
 
-  onMessage(e) {
+  onMessage = (e) => {
     let { data } = e;
 
     switch (data.type) {
@@ -109,9 +99,9 @@ class AIWorker {
         console.error(data);
         throw new Error('Unrecognized Message');
     }
-  }
+  };
 
-  requestNextMove(game, algorithm) {
+  requestNextMove = (game, algorithm) => {
     if (!this.startTime) {
       this.startTime = new Date();
     }
@@ -137,7 +127,94 @@ class AIWorker {
       algorithm,
       trainingData,
     });
+  };
+}
+
+class UIComponent {
+  constructor({ onRun, enableAutoRetry }) {
+    this.args = { onRun, enableAutoRetry };
+
+    this.mount();
+    this.update();
   }
+
+  mount = () => {
+    let mountPoint = document.createComment('div');
+
+    mountPoint.id = 'ai-mount-point';
+
+    document.body.prepend(mountPoint);
+
+    this.render();
+
+    document
+      .querySelector('.ai-container .ai-buttons button')
+      .addEventListener('click', this.args.onRun);
+
+    document
+      .querySelector('.ai-container .ai-buttons input')
+      .addEventListener('click', this.args.enableAutoRetry);
+  };
+
+  update = (data) => {
+    this.data = data;
+
+    this.mountPoint.innerHTML = this.render();
+  };
+
+  render = () => {
+    return `
+      <style>
+        .ai-container {
+          display: grid; grid-gap: 0.5rem;
+          position: fixed; top: 0.5rem; left: 0.5rem;
+          background: white; color: black;
+          padding: 0.5rem;
+          box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+          border-radius: 0.25rem;
+          font-size: 0.75rem;
+        }
+        .ai-buttons {
+          display: grid;
+          grid-gap: 0.5rem;
+          grid-auto-flow: column;
+        }
+
+        .container {
+          margin-top: 8rem;
+        }
+
+        .ai-container dt {
+          font-weight: bold;
+        }
+      </style>
+
+      <div class="ai-container">
+        <div class="ai-buttons">
+          <button type='button'>
+            Run A.I. (RNN)
+          </button>
+
+          <label>
+            Auto-Retry
+            <input type='checkbox'>
+          </label>
+        </div>
+
+        <p class='ai-stats'>
+          This Session,<br>
+          <dl>
+            <dt>Total Games</dt> <dd>${this.data.numGames}</dd>
+            <dt>Average Score</dt> <dd>${this.data.averageScore}</dd>
+            <dt>Best Score</dt> <dd>${this.data.bestScore}</dd>
+            <dt>Average Game Length</dt> <dd>${this.data.averageGameLength} minutes</dd>
+            <dt>Current Top Doctor<dt> <dd>${this.data.topDoctor}</dd>
+          </dl>
+          <br>
+        </p>
+      </div>
+    `;
+  };
 }
 
 class UI {
@@ -152,86 +229,18 @@ class UI {
 
   gameHistory = [];
 
-  constructor() {
-    // blegh, can't wait for decorators to land
-    this.setup = this.setup.bind(this);
-    this.runAI = this.runAI.bind(this);
-    this.keyDown = this.keyDown.bind(this);
-    this.requestNextMove = this.requestNextMove.bind(this);
-    this.autoRetry = this.autoRetry.bind(this);
-    this.updateStatus = this.updateStatus.bind(this);
-    this.updateStats = this.updateStats.bind(this);
-  }
+  setup = () => {
+    this.component = new UIComponent({
+      onRun: () => this.runAI('RNN'),
+      toggleAutoRetry: (e) => {
+        this.isAutoRetryEnabled = e.target.checked;
 
-  setup() {
-    let mountPoint = document.createComment('div');
-
-    mountPoint.id = 'ai-mount-point';
-
-    document.body.prepend(mountPoint);
-
-    this.vueVm = new Vue({
-      el: mountPoint,
-      name: 'ai-ui',
-      template: `
-        <style>
-          .ai-container {
-            display: grid; grid-gap: 0.5rem;
-            position: fixed; top: 0.5rem; left: 0.5rem;
-            background: white; color: black;
-            padding: 0.5rem;
-            box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-          }
-          .ai-buttons {
-            display: grid;
-            grid-gap: 0.5rem;
-            grid-auto-flow: column;
-          }
-
-          .container {
-            margin-top: 8rem;
-          }
-        </style>
-
-        <div class="ai-container">
-          <div class="ai-buttons">
-            <button type='button' @click="runAI">
-              Run A.I. (RNN)
-            </button>
-
-            <label>
-              Auto-Retry
-              <input type='checkbox' @click="toggleAutoRetry">
-            </label>
-          </div>
-
-          <p class='ai-stats'>
-            This Session,<br>
-            <dl>
-              <dt>Total Games</dt> <dd>{{ stats.numGames }}</dd>
-              <dt>Average Score</dt> <dd>{{ stats.averageScore }}</dd>
-              <dt>Best Score</dt> <dd>{{ stats.bestScore }}</dd>
-              <dt>Average Game Length</dt> <dd>{{ stats.averageGameLength }} minutes</dd>
-              <dt>Current Top Doctor<dt> <dd>{{ stats.topDoctor }}</dd>
-            </dl>
-            <br>
-          </p>
-        </div>
-      `,
-      methods: {
-        toggleAutoRetry: (e) => {
-          this.isAutoRetryEnabled = e.target.checked;
-
-          this.autoRetry();
-        },
-        runAI: () => this.runAI('RNN'),
+        this.autoRetry();
       },
     });
-  }
+  };
 
-  updateStats() {
+  updateStats = () => {
     let scores = this.gameHistory.map((h) => h.score);
     let times = this.gameHistory.map((h) => h.totalTime);
     let bestScore = Math.max(...scores);
@@ -239,27 +248,27 @@ class UI {
     let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
     let averageGameLength = round(averageTime / 1000 / 60);
 
-    this.vueVm.stats = {
+    this.component.update({
       numGames: scores.length,
       averageScore: averageScore || 0,
       bestScore: bestScore || 0,
       averageGameLength: averageGameLength || 0,
       topDoctor: this.topDoctor,
-    };
-  }
+    });
+  };
 
-  updateStatus({ topDoctor, totalTime }) {
+  updateStatus = ({ topDoctor, totalTime }) => {
     this.topDoctor = topDoctor;
     this.totalTime = totalTime;
 
     this.updateStats();
-  }
+  };
 
   get isGameOver() {
     return Boolean(document.querySelector('.game-over'));
   }
 
-  autoRetry() {
+  autoRetry = () => {
     if (!this.isAutoRetryEnabled) {
       return;
     }
@@ -281,23 +290,23 @@ class UI {
 
     // check every 10 seconds
     setTimeout(() => this.autoRetry(), 10000);
-  }
+  };
 
-  runAI(algorithm) {
+  runAI = (algorithm) => {
     this.algorithm = algorithm;
 
     this.requestNextMove();
-  }
+  };
 
-  requestNextMove() {
+  requestNextMove = () => {
     let model = JSON.parse(localStorage.getItem('gameState'));
 
     if (model !== null && !model.over) {
       container.ai.requestNextMove(model, this.algorithm);
     }
-  }
+  };
 
-  keyDown(k) {
+  keyDown = (k) => {
     let oEvent = document.createEvent('KeyboardEvent');
 
     function defineConstantGetter(name, value) {
@@ -325,39 +334,14 @@ class UI {
     setTimeout(() => {
       this.requestNextMove();
     }, 100);
-  }
+  };
 }
 
-let vueDist = 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js';
-
 async function boot() {
-  await fetchAndInsertScript(vueDist, { type: 'module' });
-  await sleep(1000);
-
   await AIWorker.create();
   await UI.create();
 
   container.ai.send({ type: 'ready' });
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-async function fetchAndInsertScript(src, attributes = {}) {
-  // fetching the URL instead of directly loading in a script
-  // tag allows us to get around CORS issues
-  let response = await fetch(src);
-  let script = await response.text();
-
-  let element = document.createElement('script');
-
-  element.innerHTML = script;
-  Object.assign(element, attributes);
-
-  document.body.appendChild(element);
 }
 
 boot();
