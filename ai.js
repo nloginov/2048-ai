@@ -238,6 +238,7 @@ class UI {
               list-style: none;
               justify-content: center;
               grid-gap: 0.5rem;
+              font-weight: bold;
             }
 
             .ct-series-0,
@@ -359,16 +360,8 @@ class UI {
   };
 
   updateGraph = () => {
-    // Trailing window of the last N games
-    const graphWidth = 60;
-
     let scores = this.gameHistory.map((h) => h.score);
     let averageScores = this.gameHistory.map((h) => h.averageScore);
-
-    scores = scores.slice(Math.max(scores.length - graphWidth, 0));
-    averageScores = averageScores.slice(
-      Math.max(averageScores.length - graphWidth, 0)
-    );
 
     this.chart.update({
       series: [
@@ -427,6 +420,12 @@ class UI {
         averageScore: averageScore || 0,
         totalTime: this.totalTime,
       });
+
+      const historySize = 60;
+
+      this.gameHistory = this.gameHistory.slice(
+        Math.max(this.gameHistory.length - historySize, 0)
+      );
 
       this.updateGraph();
 
