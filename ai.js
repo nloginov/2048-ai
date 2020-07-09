@@ -225,6 +225,25 @@ class UI {
               grid-auto-flow: column;
             }
 
+            .ai-score-over-time {
+              display: flex;
+              flex-direction: column-reverse;
+            }
+
+            .ct-legend {
+              display: grid;
+              grid-auto-flow: column;
+              margin: 0;
+            }
+
+            .ct-series-0 {
+              color: red;
+            }
+
+            .ct-series-1 {
+              color: orange;
+            }
+
             .container {
               margin-top: 8rem;
             }
@@ -309,10 +328,9 @@ class UI {
         fullWidth: true,
         axisY: {
           onlyInteger: true,
-          offset: 20,
         },
         chartPadding: {
-          right: 40,
+          left: 40,
         },
       }
     );
@@ -321,8 +339,8 @@ class UI {
   };
 
   updateGraph = () => {
-    // Trailing window of the last 50 games
-    const graphWidth = 50;
+    // Trailing window of the last N games
+    const graphWidth = 60;
 
     let scores = this.gameHistory.map((h) => h.score);
     let averageScores = this.gameHistory.map((h) => h.averageScore);
