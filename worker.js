@@ -260,6 +260,8 @@ function run({ game, algorithm, trainingData }) {
   switch (algorithm) {
     case 'RNN':
       return runRNN(game, trainingData);
+    case 'random':
+      return random();
     default:
       console.error(...arguments);
       throw new Error('Unrecognized Algorithm', algorithm);
@@ -300,8 +302,6 @@ self.onmessage = function (e) {
     case 'run':
       // it's possible to have ~ 3 moves of nothing happening
       return run(data);
-    case 'random':
-      return random(data);
     default:
       console.error(data);
       throw new Error('Unrecognized Message');
