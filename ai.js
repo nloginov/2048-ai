@@ -185,7 +185,7 @@ class UI {
   gameHistory = [];
 
   setup = () => {
-    let chart = createElement('div', { id: 'ai-score-over-time' });
+    let chart = createElement('div', { class: 'ai-score-over-time' });
     let stats = createElement('p', {
       class: 'ai-stats',
       template: (data) => {
