@@ -133,6 +133,7 @@ class AIWorker {
 function createElement(tagName, { events, children, template, ...attributes }) {
   let element = document.createElement(tagName);
 
+  debugger;
   Object.assign(element, attributes || {});
 
   Object.entries(events || {}).forEach(([eventName, handler]) => {
@@ -183,7 +184,7 @@ class UI {
             <dt>Average Score</dt> <dd>${data.averageScore}</dd>
             <dt>Best Score</dt> <dd>${data.bestScore}</dd>
             <dt>Average Game Length</dt> <dd>${data.averageGameLength} minutes</dd>
-            <dt>Current Top Doctor<dt> <dd>${data.topDoctor}</dd>
+            <dt>Current Top Doctor</dt> <dd>${data.topDoctor}</dd>
           </dl>
         `;
       },
@@ -214,6 +215,11 @@ class UI {
 
             .ai-container dt {
               font-weight: bold;
+            }
+
+            .ai-container dl {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
             }
           `,
         }),
