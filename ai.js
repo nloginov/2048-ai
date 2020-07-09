@@ -157,7 +157,7 @@ class UIComponent {
   };
 
   update = (data) => {
-    this.data = data;
+    this.data = data || {};
 
     this.mountPoint.innerHTML = this.render();
   };
