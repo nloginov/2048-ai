@@ -295,6 +295,11 @@ class UI {
         series: [],
       },
       {
+        plugins: [
+          Chartist.plugins.legend({
+            legendNames: ['Score', 'Average Score'],
+          }),
+        ],
         fullWidth: true,
         axisY: {
           onlyInteger: true,
@@ -309,13 +314,17 @@ class UI {
     this.stats = stats;
   };
 
-  updateStats = () => {
+  updateGraph = () => {
+    // Trailing window of the last 50 games
+    const graphWidth = 50;
+
     let scores = this.gameHistory.map((h) => h.score);
     let averageScores = this.gameHistory.map((h) => h.averageScore);
-    let times = this.gameHistory.map((h) => h.totalTime);
-    let bestScore = Math.max(...scores);
-    let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
-    let averageGameLength = round(averageTime / 1000 / 60);
+
+    scores = scores.slice(Math.max(scores.length - graphWidth, 0));
+    averageScores = averageScores.slice(
+      Math.max(averageScores.length - graphWidth, 0)
+    );
 
     this.chart.update({
       series: [
@@ -323,6 +332,15 @@ class UI {
         { name: 'Average Score', data: averageScores },
       ],
     });
+  };
+
+  updateStats = () => {
+    let scores = this.gameHistory.map((h) => h.score);
+    let averageScores = this.gameHistory.map((h) => h.averageScore);
+    let times = this.gameHistory.map((h) => h.totalTime);
+    let bestScore = Math.max(...scores);
+    let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
+    let averageGameLength = round(averageTime / 1000 / 60);
 
     this.stats.update({
       numGames: scores.length,
@@ -365,6 +383,8 @@ class UI {
         averageScore: averageScore || 0,
         totalTime: this.totalTime,
       });
+
+      this.updateGraph();
 
       container.ai.startTime = undefined;
 
@@ -438,14 +458,18 @@ async function installFile(url, type = 'script') {
 async function installChartist() {
   let js = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js';
   let css = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css';
+  let legendJs =
+    'https://codeyellowbv.github.io/chartist-plugin-legend/chartist-plugin-legend.js';
 
   await installFile(js);
   await installFile(css, 'style');
+  await installFile(legendJs);
   // rel="stylesheet" type="text/css" />
 }
 
 async function boot() {
   await installChartist();
+
   await AIWorker.create();
   await UI.create();
 
