@@ -330,11 +330,18 @@ let vueDist = 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js';
 
 async function boot() {
   await fetchAndInsertScript(vueDist, { type: 'module' });
+  await sleep(1000);
 
   await AIWorker.create();
   await UI.create();
 
   container.ai.send({ type: 'ready' });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function fetchAndInsertScript(src, attributes = {}) {
