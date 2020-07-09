@@ -130,10 +130,7 @@ class AIWorker {
   };
 }
 
-function createElement(
-  tagName,
-  { events, children, template, ...attributes } = {}
-) {
+function createElement(tagName, { events, children, template, ...attributes }) {
   let element = document.createElement(tagName);
 
   Object.assign(element, attributes || {});
@@ -196,30 +193,28 @@ class UI {
       children: [
         createElement('style', {
           template: `
-            <style>
-              .ai-container {
-                display: grid; grid-gap: 0.5rem;
-                position: fixed; top: 0.5rem; left: 0.5rem;
-                background: white; color: black;
-                padding: 0.5rem;
-                box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
-                border-radius: 0.25rem;
-                font-size: 0.75rem;
-              }
-              .ai-buttons {
-                display: grid;
-                grid-gap: 0.5rem;
-                grid-auto-flow: column;
-              }
+            .ai-container {
+              display: grid; grid-gap: 0.5rem;
+              position: fixed; top: 0.5rem; left: 0.5rem;
+              background: white; color: black;
+              padding: 0.5rem;
+              box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+              border-radius: 0.25rem;
+              font-size: 0.75rem;
+            }
+            .ai-buttons {
+              display: grid;
+              grid-gap: 0.5rem;
+              grid-auto-flow: column;
+            }
 
-              .container {
-                margin-top: 8rem;
-              }
+            .container {
+              margin-top: 8rem;
+            }
 
-              .ai-container dt {
-                font-weight: bold;
-              }
-            </style>
+            .ai-container dt {
+              font-weight: bold;
+            }
           `,
         }),
         createElement('div', {
