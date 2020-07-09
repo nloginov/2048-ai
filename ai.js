@@ -236,12 +236,21 @@ class UI {
               margin: 0;
             }
 
-            .ct-series-0 {
-              color: red;
+            .ct-series-0,
+            .ct-series-a .ct-bar,
+            .ct-series-a .ct-line,
+            .ct-series-a .ct-point,
+            .ct-series-a .ct-slice-donut {
+                stroke: #0CC162;
+                color: #0CC162;
             }
-
-            .ct-series-1 {
-              color: orange;
+            .ct-series-1,
+            .ct-series-b .ct-bar,
+            .ct-series-b .ct-line,
+            .ct-series-b .ct-point,
+            .ct-series-b .ct-slice-donut {
+                stroke: #0C62C1;
+                color: #0C62C1;
             }
 
             .container {
