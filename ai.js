@@ -201,12 +201,17 @@ class UI {
       },
     });
     let mount = createElement('div', {
-      class: 'ai-container',
+      class: 'ai-container grid',
       children: [
         createElement('style', {
           template: `
-            .ai-container {
+            .grid {
               display: grid; grid-gap: 0.5rem;
+            }
+            .grid-col {
+              grid-auto-flow: column;
+            }
+            .ai-container {
               position: fixed; top: 0.5rem; left: 0.5rem;
               background: white; color: black;
               padding: 0.5rem;
@@ -214,9 +219,8 @@ class UI {
               border-radius: 0.25rem;
               font-size: 0.75rem;
             }
+
             .ai-buttons {
-              display: grid;
-              grid-gap: 0.5rem;
               grid-auto-flow: column;
             }
 
@@ -247,33 +251,38 @@ class UI {
           `,
         }),
         createElement('div', {
-          class: 'ai-buttons',
+          class: 'grid grid-col',
           children: [
-            createElement('button', {
-              type: 'button',
-              template: 'Run A.I. (RNN)',
-              events: {
-                click: () => this.runAI('RNN'),
-              },
-            }),
-            createElement('label', {
+            createElement('div', {
+              class: 'ai-buttons grid',
               children: [
-                createElement('input', {
-                  type: 'checkbox',
+                createElement('button', {
+                  type: 'button',
+                  template: 'Run A.I. (RNN)',
                   events: {
-                    click: (e) => {
-                      this.isAutoRetryEnabled = e.target.checked;
-
-                      this.autoRetry();
-                    },
+                    click: () => this.runAI('RNN'),
                   },
                 }),
-                createElement('span', { template: 'Auto-Retry' }),
+                createElement('label', {
+                  children: [
+                    createElement('input', {
+                      type: 'checkbox',
+                      events: {
+                        click: (e) => {
+                          this.isAutoRetryEnabled = e.target.checked;
+
+                          this.autoRetry();
+                        },
+                      },
+                    }),
+                    createElement('span', { template: 'Auto-Retry' }),
+                  ],
+                }),
               ],
             }),
+            stats,
           ],
         }),
-        stats,
         chart,
       ],
     });
