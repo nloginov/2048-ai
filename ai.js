@@ -299,6 +299,9 @@ class UI {
           onlyInteger: true,
           offset: 20,
         },
+        chartPadding: {
+          right: 40,
+        },
       }
     );
     document.body.appendChild(mount);
@@ -307,13 +310,20 @@ class UI {
 
   updateStats = () => {
     let scores = this.gameHistory.map((h) => h.score);
+    let averageScores = this.gameHistory.map((h) => h.averageScore);
     let times = this.gameHistory.map((h) => h.totalTime);
     let bestScore = Math.max(...scores);
     let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
-    let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    let averageScore = this.gameHistory[this.gameHistory.length - 1]
+      .averageScore;
     let averageGameLength = round(averageTime / 1000 / 60);
 
-    this.chart.update({ series: [scores] });
+    this.chart.update({
+      series: [
+        { name: 'Score', data: scores },
+        { name: 'Average Score', data: averageScores },
+      ],
+    });
 
     this.stats.update({
       numGames: scores.length,
@@ -346,7 +356,16 @@ class UI {
         10
       );
 
-      this.gameHistory.push({ score, totalTime: this.totalTime });
+      let scores = [this.gameHistory.map((h) => h.score), score];
+      let averageScore = round(
+        scores.reduce((a, b) => a + b, 0) / scores.length
+      );
+
+      this.gameHistory.push({
+        score,
+        averageScore: averageScore || 0,
+        totalTime: this.totalTime,
+      });
 
       container.ai.startTime = undefined;
 
