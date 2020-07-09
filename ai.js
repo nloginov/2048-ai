@@ -354,7 +354,7 @@ class UI {
         10
       );
 
-      let scores = [this.gameHistory.map((h) => h.score), score];
+      let scores = [...this.gameHistory.map((h) => h.score), score];
       let averageScore = round(
         scores.reduce((a, b) => a + b, 0) / scores.length
       );
