@@ -212,6 +212,7 @@ class UI {
               grid-auto-flow: column;
             }
             .ai-container {
+              grid-template-columns: 400px 1fr;
               position: fixed; top: 0.5rem; left: 0.5rem; right: 0.5rem;
               background: white; color: black;
               padding: 0.5rem;
