@@ -13,12 +13,12 @@ const MOVE_KEY_MAP = {
   [MOVE.DOWN]: 2,
   [MOVE.LEFT]: 3,
 };
-const MOVE_NAMES_MAP = {
-  [MOVE.UP]: 'up',
-  [MOVE.RIGHT]: 'right',
-  [MOVE.DOWN]: 'down',
-  [MOVE.LEFT]: 'left',
-};
+// const MOVE_NAMES_MAP = {
+//   [MOVE.UP]: 'up',
+//   [MOVE.RIGHT]: 'right',
+//   [MOVE.DOWN]: 'down',
+//   [MOVE.LEFT]: 'left',
+// };
 
 const voidFn = () => undefined;
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
@@ -253,7 +253,6 @@ async function runRNN(game, trainingData) {
 
   rnn.learn(reward);
 
-  console.debug({ reward, moveIndex, move, moveName: MOVE_NAMES_MAP[move] });
   self.postMessage({ type: 'move', move, trainingData: rnn.toJSON() });
 }
 
@@ -265,6 +264,14 @@ function run({ game, algorithm, trainingData }) {
       console.error(...arguments);
       throw new Error('Unrecognized Algorithm', algorithm);
   }
+}
+
+function random() {
+  let moveIndex = Math.round(Math.random() * 4);
+
+  let move = ALL_MOVES[moveIndex];
+
+  self.postMessage({ type: 'move', move });
 }
 
 async function loadDependencies() {
@@ -293,6 +300,8 @@ self.onmessage = function (e) {
     case 'run':
       // it's possible to have ~ 3 moves of nothing happening
       return run(data);
+    case 'random':
+      return random(data);
     default:
       console.error(data);
       throw new Error('Unrecognized Message');
