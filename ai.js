@@ -465,12 +465,11 @@ async function installChartist() {
   let js = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js';
   let css = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css';
   let legendJs =
-    'https://codeyellowbv.github.io/chartist-plugin-legend/chartist-plugin-legend.js';
+    'https://raw.githubusercontent.com/NullVoxPopuli/doctor-who-thirteen-game-ai/master/vendor/chartist.js';
 
   await installFile(js);
   await installFile(css, 'style');
   await installFile(legendJs);
-  // rel="stylesheet" type="text/css" />
 }
 
 async function boot() {
