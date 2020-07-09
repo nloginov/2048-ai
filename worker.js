@@ -44,14 +44,6 @@ const gameTo1DArray = (game) => {
   return game.grid.cells.flat().map((cell) => (cell ? cell.value : 0));
 };
 
-const highestCells = (game) => {
-  let cellList = game.grid.cells.flat();
-
-  let sorted = cellList.sort((a, b) => (b ? b.value : 0) - (a ? a.value : 0));
-
-  return sorted;
-};
-
 const groupByValue = (game) => {
   let values = gameTo1DArray(game);
 
@@ -171,20 +163,6 @@ function createRnn() {
   };
 
   return new RL.DQNAgent(env, spec);
-}
-
-function outcomesForEachMove(game) {
-  let result = [];
-
-  for (let move of ALL_MOVES) {
-    let clonedGame = clone(game);
-    let moveData = imitateMove(clonedGame, move);
-
-    result.push(moveData);
-  }
-
-  // biggest first
-  return result.sort((a, b) => b.score - a.score);
 }
 
 const calculateReward = (move, originalGame) => {

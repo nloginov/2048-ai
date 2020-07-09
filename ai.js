@@ -1,3 +1,4 @@
+/* global Chartist */
 // NOTE: decorators do not exist in browsers, so we can't
 //       use any sort of fancy auto-"bind" decoration :(
 // poor man's Dependency Injection
@@ -184,7 +185,7 @@ class UI {
   gameHistory = [];
 
   setup = () => {
-    let chart = createElement('svg', { id: 'score-over-time' });
+    let chart = createElement('div', { id: 'ai-score-over-time' });
     let stats = createElement('p', {
       class: 'ai-stats',
       template: (data) => {
@@ -277,6 +278,20 @@ class UI {
       ],
     });
 
+    this.chart = new Chartist.Line(
+      '.ai-score-over-time',
+      {
+        labels: [],
+        series: [],
+      },
+      {
+        fullWidth: true,
+        axisY: {
+          onlyInteger: true,
+          offset: 20,
+        },
+      }
+    );
     document.body.appendChild(mount);
     this.stats = stats;
   };
@@ -288,6 +303,8 @@ class UI {
     let averageTime = times.reduce((a, b) => a + b, 0) / times.length;
     let averageScore = round(scores.reduce((a, b) => a + b, 0) / scores.length);
     let averageGameLength = round(averageTime / 1000 / 60);
+
+    this.chart.update({ series: [scores] });
 
     this.stats.update({
       numGames: scores.length,
@@ -378,7 +395,30 @@ class UI {
   };
 }
 
+async function installFile(url, type = 'script') {
+  // fetching the URL instead of directly loading in a script
+  // tag allows us to get around CORS issues
+  let response = await fetch(url);
+  let script = await response.text();
+
+  let element = document.createElement(type);
+
+  element.innerHTML = script;
+
+  document.body.appendChild(element);
+}
+
+async function installChartist() {
+  let js = 'http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js';
+  let css = 'http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css';
+
+  await installFile(js);
+  await installFile(css, 'style');
+  // rel="stylesheet" type="text/css" />
+}
+
 async function boot() {
+  await installChartist();
   await AIWorker.create();
   await UI.create();
 
