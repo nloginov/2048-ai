@@ -256,6 +256,15 @@ async function runRNN(game, trainingData) {
   self.postMessage({ type: 'move', move, trainingData: rnn.toJSON() });
 }
 
+function random() {
+  // only need to multiply by 3, because 0 counts as our fourth
+  let moveIndex = Math.round(Math.random() * 3);
+
+  let move = ALL_MOVES[moveIndex];
+
+  self.postMessage({ type: 'move', move });
+}
+
 function run({ game, algorithm, trainingData }) {
   switch (algorithm) {
     case 'RNN':
@@ -266,14 +275,6 @@ function run({ game, algorithm, trainingData }) {
       console.error(...arguments);
       throw new Error('Unrecognized Algorithm', algorithm);
   }
-}
-
-function random() {
-  let moveIndex = Math.round(Math.random() * 4);
-
-  let move = ALL_MOVES[moveIndex];
-
-  self.postMessage({ type: 'move', move });
 }
 
 async function loadDependencies() {
