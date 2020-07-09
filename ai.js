@@ -134,6 +134,8 @@ class UIComponent {
   constructor({ onRun, enableAutoRetry }) {
     this.args = { onRun, enableAutoRetry };
 
+    this.data = {};
+
     this.mount();
     this.update();
   }
