@@ -324,7 +324,7 @@ let vueDist =
   'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.min.js';
 
 async function boot() {
-  await fetchAndInsertScript(vueDist);
+  await fetchAndInsertScript(vueDist, { type: 'module' });
 
   await AIWorker.create();
   await UI.create();
@@ -332,7 +332,7 @@ async function boot() {
   container.ai.send({ type: 'ready' });
 }
 
-async function fetchAndInsertScript(src) {
+async function fetchAndInsertScript(src, attributes = {}) {
   // fetching the URL instead of directly loading in a script
   // tag allows us to get around CORS issues
   let response = await fetch(src);
@@ -341,6 +341,7 @@ async function fetchAndInsertScript(src) {
   let element = document.createElement('script');
 
   element.innerHTML = script;
+  Object.assign(element, attributes);
 
   document.body.appendChild(element);
 }
