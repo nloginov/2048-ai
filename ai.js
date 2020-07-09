@@ -133,7 +133,7 @@ class AIWorker {
 function createElement(tagName, { events, children, template, ...attributes }) {
   let element = document.createElement(tagName);
 
-  for (let [key, v] of Object.entries(attributes)) {
+  for (let [key, v] of Object.entries(attributes || {})) {
     switch (key) {
       case 'class':
         element.classList.add(v);
@@ -143,7 +143,7 @@ function createElement(tagName, { events, children, template, ...attributes }) {
     }
   }
 
-  for (let [eventName, handler] of Object.entries(events)) {
+  for (let [eventName, handler] of Object.entries(events || {})) {
     element.addEventListener(eventName, handler);
   }
 
