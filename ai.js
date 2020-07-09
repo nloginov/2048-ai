@@ -140,7 +140,7 @@ const createElement = (
   for (let [key, v] of Object.entries(attributes || {})) {
     switch (key) {
       case 'class':
-        element.classList.add(v);
+        element.classList.add(...v.split(' '));
         break;
       default:
         element[key] = v;
