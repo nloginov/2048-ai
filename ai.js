@@ -130,7 +130,10 @@ class AIWorker {
   };
 }
 
-function createElement(tagName, { events, children, template, ...attributes }) {
+const createElement = (
+  tagName,
+  { events, children, template, ...attributes }
+) => {
   let element = document.createElement(tagName);
 
   for (let [key, v] of Object.entries(attributes || {})) {
@@ -166,7 +169,7 @@ function createElement(tagName, { events, children, template, ...attributes }) {
   }
 
   return element;
-}
+};
 
 class UI {
   static async create() {
@@ -244,9 +247,7 @@ class UI {
               type: 'button',
               template: 'Run A.I. (RNN)',
               events: {
-                click() {
-                  this.runAI('RNN');
-                },
+                click: () => this.runAI('RNN'),
               },
             }),
             createElement('label', {
@@ -254,7 +255,7 @@ class UI {
                 createElement('input', {
                   type: 'checkbox',
                   events: {
-                    click(e) {
+                    click: (e) => {
                       this.isAutoRetryEnabled = e.target.checked;
 
                       this.autoRetry();
