@@ -234,6 +234,10 @@ class UI {
               display: grid;
               grid-auto-flow: column;
               margin: 0;
+              padding: 0;
+              list-style: none;
+              justify-content: center;
+              grid-gap: 0.5rem;
             }
 
             .ct-series-0,
