@@ -409,8 +409,8 @@ async function installFile(url, type = 'script') {
 }
 
 async function installChartist() {
-  let js = 'http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js';
-  let css = 'http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css';
+  let js = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js';
+  let css = 'https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css';
 
   await installFile(js);
   await installFile(css, 'style');
