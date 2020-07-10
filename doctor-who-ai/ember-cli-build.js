@@ -1,24 +1,46 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const gitRev = require('git-rev-sync');
+const mergeTrees = require('broccoli-merge-trees');
+const UnwatchedDir = require('broccoli-source').UnwatchedDir;
+
+const { buildWorkerTrees } = require('./config/build/workers');
+
+const { EMBROIDER, CONCAT_STATS } = process.env;
 
 module.exports = function(defaults) {
+
+  let environment = EmberApp.env();
+  let isProduction = environment === 'production';
+
+  let version = gitRev.short();
+
+  let env = {
+
+    isProduction,
+    isTest: environment === 'test',
+    version,
+    CONCAT_STATS,
+  }
   let app = new EmberApp(defaults, {
-    // Add options here
+    hinting: false,
+    autoprefixer: {
+      enabled: false,
+      sourcemaps: false,
+    },
+    sourcemaps: {
+      enabled: false,
+    },
+    fingerprint: {
+      // need stable URL for bookmarklet to load
+      enabled: false,
+    }
   });
 
-  // Use `app.import` to add additional libraries to the generated
-  // output files.
-  //
-  // If you need to use different assets in different
-  // environments, specify an object as the first parameter. That
-  // object's keys should be the environment name and the values
-  // should be the asset to use in that environment.
-  //
-  // If the library that you are including contains AMD or ES6
-  // modules that you would like to import into your application
-  // please specify an object with the list of modules as keys
-  // along with the exports of each module as its value.
+  app.trees.public = new UnwatchedDir('public');
 
-  return app.toTree();
+  let additionalTrees = [...buildWorkerTrees(env)]
+
+  return mergeTrees([app.toTree(), ...additionalTrees]);
 };

@@ -5,7 +5,9 @@ module.exports = function(environment) {
     modulePrefix: 'doctor-who-ai',
     environment,
     rootURL: '/',
-    locationType: 'auto',
+    // locationType: 'auto',
+    // disable URL Management
+    locationType: 'none',
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
